@@ -2,12 +2,16 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Hero3DBook from '../components/Hero3DBook';
-import { Book, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 const Index = () => {
   const [bookHovered, setBookHovered] = useState(false);
   const [dustParticles, setDustParticles] = useState<Array<{id: number, size: number, x: number, y: number, delay: number}>>([]);
+  const [scrollY, setScrollY] = useState(0);
+  const [bookFixed, setBookFixed] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
+  const purchaseSectionRef = useRef<HTMLDivElement>(null);
+  const bookWrapperRef = useRef<HTMLDivElement>(null);
   
   // Generate dust particles
   useEffect(() => {
@@ -22,6 +26,28 @@ const Index = () => {
     }));
     
     setDustParticles(particles);
+  }, []);
+
+  // Handle scroll for book positioning
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+      
+      if (purchaseSectionRef.current && bookWrapperRef.current) {
+        const purchaseTop = purchaseSectionRef.current.getBoundingClientRect().top;
+        const viewportHeight = window.innerHeight;
+        
+        // Set the book to fixed position when it should follow scroll
+        if (purchaseTop < viewportHeight * 0.8 && purchaseTop > 0) {
+          setBookFixed(true);
+        } else {
+          setBookFixed(false);
+        }
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
@@ -70,24 +96,27 @@ const Index = () => {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                <Link to="/books" className="gold-btn group flex items-center justify-center gap-2">
-                  <span>Explore the Book</span>
+                <a href="#purchase-section" className="gold-btn group flex items-center justify-center gap-2">
+                  <span>Purchase Now</span>
                   <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-300" />
-                </Link>
+                </a>
                 <Link to="/about" className="border border-antique/40 hover:border-gold text-antique hover:text-gold py-2 px-6 rounded transition-all duration-300 font-cormorant uppercase tracking-widest text-sm">
                   About Author
                 </Link>
               </div>
             </div>
             
-            <div className="h-[500px]">
-              <Link to="/books" className="block h-full">
+            <div 
+              ref={bookWrapperRef}
+              className={`h-[500px] ${bookFixed ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+            >
+              <div className="block h-full">
                 <Hero3DBook 
                   isHovered={bookHovered} 
                   bookTitle="The Secret Library" 
                   bookAuthor="Author Name"
                 />
-              </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -102,43 +131,94 @@ const Index = () => {
         </div>
       </div>
       
-      {/* Featured Books Section */}
-      <section className="py-20 px-4">
+      {/* Floating Book that follows scroll */}
+      <div 
+        className={`fixed left-0 top-1/2 transform -translate-y-1/2 w-[300px] h-[400px] z-30 transition-opacity duration-500 pointer-events-none
+          ${bookFixed ? 'opacity-100' : 'opacity-0'}`}
+        style={{
+          transform: `translate3d(calc(${scrollY * 0.1}px), -50%, 0)`,
+          maxTranslateX: '40vw'
+        }}
+      >
+        <Hero3DBook 
+          isHovered={true}
+          isOpened={bookFixed}
+          bookTitle="The Secret Library" 
+          bookAuthor="Author Name"
+        />
+      </div>
+      
+      {/* Purchase Section */}
+      <section 
+        ref={purchaseSectionRef}
+        id="purchase-section" 
+        className="py-20 px-4 min-h-screen flex items-center"
+      >
         <div className="container mx-auto">
-          <h2 className="text-4xl font-cormorant font-bold text-gold mb-12 text-center">
-            <span className="relative inline-block">
-              Featured Works
-              <span className="absolute -bottom-3 left-0 right-0 h-0.5 bg-gold/30"></span>
-            </span>
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[1, 2, 3].map((book) => (
-              <div 
-                key={book}
-                className="relative group"
-              >
-                <div className="book-page h-full transform group-hover:-translate-y-2 transition-transform duration-300">
-                  <div className="aspect-[2/3] bg-forest/20 mb-4 overflow-hidden">
-                    <img 
-                      src={`/textures/book-cover-${book}.jpg`} 
-                      alt={`Book ${book}`} 
-                      className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-300"
-                    />
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-center">
+            {/* Left side - invisible placeholder that takes space for the fixed book */}
+            <div className="lg:col-span-2 hidden lg:block">
+              <div className="h-[500px] w-full"></div>
+            </div>
+            
+            {/* Right side - purchase options */}
+            <div className="lg:col-span-3 space-y-8">
+              <div className="book-page p-8 relative overflow-hidden">
+                <h2 className="text-4xl font-cormorant font-bold text-gold mb-6">The Secret Library</h2>
+                
+                <div className="absolute top-0 right-0 w-16 h-16">
+                  <img src="/textures/wax-seal.png" alt="Authentic Seal" className="w-full h-full object-contain transform rotate-12" />
+                </div>
+                
+                <p className="text-ivory/90 text-lg mb-8 font-baskerville italic">
+                  A journey through the forgotten corridors of knowledge, where ancient wisdom and mystical secrets are preserved in pages touched by time itself.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  <div className="space-y-3">
+                    <h3 className="text-gold text-xl font-cormorant">Hardcover Edition</h3>
+                    <p className="text-antique/80">Premium binding with gold-embossed detail</p>
+                    <p className="text-2xl font-cormorant text-gold">$35.99</p>
+                    <button className="relative group w-full max-w-[180px]">
+                      <img src="/textures/wax-seal-2.png" alt="Purchase" className="w-full h-auto transition-transform group-hover:scale-105" />
+                      <span className="absolute inset-0 flex items-center justify-center text-navy font-cormorant font-semibold">Purchase</span>
+                    </button>
                   </div>
-                  <h3 className="text-2xl font-cormorant font-semibold text-gold">Book Title {book}</h3>
-                  <p className="text-sm text-ivory/70 mt-2">
-                    A captivating journey through ancient mysteries and forgotten knowledge.
-                  </p>
-                  <div className="mt-4">
-                    <Link to="/books" className="text-gold hover:text-ivory transition-colors duration-300 text-sm uppercase tracking-wider font-cormorant flex items-center gap-2 group">
-                      <span>Discover More</span> 
-                      <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-300" />
-                    </Link>
+                  
+                  <div className="space-y-3">
+                    <h3 className="text-gold text-xl font-cormorant">Digital Edition</h3>
+                    <p className="text-antique/80">Instant access on all your devices</p>
+                    <p className="text-2xl font-cormorant text-gold">$19.99</p>
+                    <button className="relative group w-full max-w-[180px]">
+                      <img src="/textures/wax-seal-2.png" alt="Purchase" className="w-full h-auto transition-transform group-hover:scale-105" />
+                      <span className="absolute inset-0 flex items-center justify-center text-navy font-cormorant font-semibold">Purchase</span>
+                    </button>
                   </div>
                 </div>
+                
+                <div className="flex items-center space-x-4 text-antique/70 text-sm mt-6">
+                  <span>Free shipping on orders over $50</span>
+                  <span className="h-1 w-1 bg-gold rounded-full"></span>
+                  <span>30-day money back guarantee</span>
+                </div>
               </div>
-            ))}
+              
+              <div className="book-page p-8 relative overflow-hidden">
+                <h3 className="text-2xl font-cormorant font-bold text-gold mb-4">Sample Chapter</h3>
+                <div className="border-l-2 border-gold/30 pl-6 text-ivory/90 font-baskerville">
+                  <p className="mb-4 first-letter:text-3xl first-letter:font-bold first-letter:text-gold first-letter:mr-1 first-letter:float-left">
+                    The ancient library stood silent as the centuries that had passed within its walls. Dust motes danced in the shafts of light that pierced the gloom, illuminating shelves that groaned under the weight of forgotten knowledge.
+                  </p>
+                  <p className="mb-4">
+                    As I moved deeper into the labyrinth of bookshelves, the air grew thick with the scent of aged parchment and leather bindings. Each step echoed against the marble floor, a rhythmic reminder that I was but a temporary visitor in a place where time itself seemed to slow.
+                  </p>
+                  <p>
+                    It was then that I saw it—a tome bound in deep crimson leather, its spine adorned with symbols I had never encountered in all my years of study...
+                  </p>
+                </div>
+                <div className="h-4 w-full bg-[url('/textures/deckled-edge.png')] bg-repeat-x bg-bottom absolute bottom-0 left-0 opacity-40"></div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
