@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Book, User, PaintBrush, Home } from 'lucide-react';
+import { Book, User, Paintbrush, Home } from 'lucide-react';
 
 const Navigation = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -88,7 +87,7 @@ const Navigation = () => {
             to="/gallery" 
             className={`nav-item flex items-center gap-1 ${isActive('/gallery') ? 'text-gold border-b border-gold' : ''}`}
           >
-            <PaintBrush size={16} />
+            <Paintbrush size={16} />
             <span>Gallery</span>
           </Link>
         </div>
@@ -130,7 +129,7 @@ const Navigation = () => {
             className={`nav-item flex items-center gap-2 ${isActive('/gallery') ? 'text-gold' : ''}`}
             onClick={() => setMenuOpen(false)}
           >
-            <PaintBrush size={16} />
+            <Paintbrush size={16} />
             <span>Gallery</span>
           </Link>
         </div>
