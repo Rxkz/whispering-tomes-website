@@ -174,20 +174,13 @@ const Hero3DBook = ({
       
       // Apply book opening animation if needed
       if (isOpened) {
-        const openAngle = Math.PI * 0.7; // More dramatic opening angle
-        frontCover.rotation.y += (openAngle - frontCover.rotation.y) * 0.05;
-        
-        // When book is fully opened, move it slightly to show pages better
-        if (frontCover.rotation.y > Math.PI * 0.3) {
-          book.position.x += (0.5 - book.position.x) * 0.05;
-        }
+        const openAngle = Math.PI * 0.2;
+        frontCover.rotation.y += (openAngle - frontCover.rotation.y) * 0.1;
       } else if (isHovered) {
-        const hoverAngle = Math.PI * 0.08;
+        const hoverAngle = Math.PI * 0.05;
         frontCover.rotation.y += (hoverAngle - frontCover.rotation.y) * 0.1;
-        book.position.x += (0 - book.position.x) * 0.1;
       } else {
         frontCover.rotation.y += (0 - frontCover.rotation.y) * 0.1;
-        book.position.x += (0 - book.position.x) * 0.1;
       }
       
       rendererRef.current.render(sceneRef.current, cameraRef.current);
@@ -224,7 +217,7 @@ const Hero3DBook = ({
       
       renderer.dispose();
     };
-  }, [isMobile, coverImage]);
+  }, [isMobile]);
   
   return (
     <div className="relative w-full h-full">
