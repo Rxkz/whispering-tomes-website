@@ -2,6 +2,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Hero3DBook from '../components/Hero3DBook';
+import { Book, ArrowRight } from 'lucide-react';
 
 const Index = () => {
   const [bookHovered, setBookHovered] = useState(false);
@@ -69,8 +70,9 @@ const Index = () => {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                <Link to="/books" className="gold-btn">
-                  Explore Books
+                <Link to="/books" className="gold-btn group flex items-center justify-center gap-2">
+                  <span>Explore the Book</span>
+                  <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-300" />
                 </Link>
                 <Link to="/about" className="border border-antique/40 hover:border-gold text-antique hover:text-gold py-2 px-6 rounded transition-all duration-300 font-cormorant uppercase tracking-widest text-sm">
                   About Author
@@ -79,11 +81,13 @@ const Index = () => {
             </div>
             
             <div className="h-[500px]">
-              <Hero3DBook 
-                isHovered={bookHovered} 
-                bookTitle="The Secret Library" 
-                bookAuthor="Author Name"
-              />
+              <Link to="/books" className="block h-full">
+                <Hero3DBook 
+                  isHovered={bookHovered} 
+                  bookTitle="The Secret Library" 
+                  bookAuthor="Author Name"
+                />
+              </Link>
             </div>
           </div>
         </div>
@@ -127,8 +131,9 @@ const Index = () => {
                     A captivating journey through ancient mysteries and forgotten knowledge.
                   </p>
                   <div className="mt-4">
-                    <Link to="/books" className="text-gold hover:text-ivory transition-colors duration-300 text-sm uppercase tracking-wider font-cormorant">
-                      Discover More &rarr;
+                    <Link to="/books" className="text-gold hover:text-ivory transition-colors duration-300 text-sm uppercase tracking-wider font-cormorant flex items-center gap-2 group">
+                      <span>Discover More</span> 
+                      <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform duration-300" />
                     </Link>
                   </div>
                 </div>
