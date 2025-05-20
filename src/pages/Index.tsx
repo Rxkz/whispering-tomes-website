@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Hero3DBook from '../components/Hero3DBook';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ShoppingCart } from 'lucide-react';
 
 const Index = () => {
   const [bookHovered, setBookHovered] = useState(false);
@@ -51,8 +51,8 @@ const Index = () => {
   }, []);
 
   // Calculate the maximum translation value to limit the book's movement
-  const maxTranslateX = '40vw';
-  const translateX = Math.min(scrollY * 0.1, parseInt(maxTranslateX));
+  const maxTranslateValue = 40; // value in viewport width units
+  const translateX = Math.min(scrollY * 0.1, maxTranslateValue);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -112,7 +112,7 @@ const Index = () => {
             
             <div 
               ref={bookWrapperRef}
-              className={`h-[500px] ${bookFixed ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
+              className={`h-[500px] ${bookFixed ? 'opacity-0' : 'opacity-100'} transition-opacity duration-500`}
             >
               <div className="block h-full">
                 <Hero3DBook 
@@ -137,10 +137,10 @@ const Index = () => {
       
       {/* Floating Book that follows scroll */}
       <div 
-        className={`fixed left-0 top-1/2 transform -translate-y-1/2 w-[300px] h-[400px] z-30 transition-opacity duration-500 pointer-events-none
+        className={`fixed left-0 top-1/2 transform -translate-y-1/2 w-[300px] h-[400px] z-30 transition-all duration-700 ease-out pointer-events-none
           ${bookFixed ? 'opacity-100' : 'opacity-0'}`}
         style={{
-          transform: `translate3d(${Math.min(scrollY * 0.1, parseInt(maxTranslateX))}px, -50%, 0)`
+          transform: `translate3d(${translateX}vw, -50%, 0)`,
         }}
       >
         <Hero3DBook 
@@ -169,44 +169,44 @@ const Index = () => {
               <div className="book-page p-8 relative overflow-hidden">
                 <h2 className="text-4xl font-cormorant font-bold text-gold mb-6">The Secret Library</h2>
                 
-                <div className="absolute top-0 right-0 w-16 h-16">
-                  <img src="/textures/wax-seal.png" alt="Authentic Seal" className="w-full h-full object-contain transform rotate-12" />
+                <div className="absolute top-4 right-4 w-16 h-16">
+                  <img src="/lovable-uploads/84e305e7-527f-46e3-a6e6-13dd2463c76d.png" alt="Authentic Seal" className="w-full h-full object-contain" />
                 </div>
                 
                 <p className="text-ivory/90 text-lg mb-8 font-baskerville italic">
                   A journey through the forgotten corridors of knowledge, where ancient wisdom and mystical secrets are preserved in pages touched by time itself.
                 </p>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                  <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-8">
+                  <div className="space-y-3 animate-fade-in" style={{ animationDelay: '0.2s' }}>
                     <h3 className="text-gold text-xl font-cormorant">Hardcover Edition</h3>
                     <p className="text-antique/80">Premium binding with gold-embossed detail</p>
                     <p className="text-2xl font-cormorant text-gold">$35.99</p>
-                    <button className="relative group w-full max-w-[180px]">
-                      <img src="/textures/wax-seal-2.png" alt="Purchase" className="w-full h-auto transition-transform group-hover:scale-105" />
+                    <button className="relative group w-full max-w-[180px] hover:scale-105 transition-transform duration-300">
+                      <img src="/textures/wax-seal-2.png" alt="Purchase" className="w-full h-auto" />
                       <span className="absolute inset-0 flex items-center justify-center text-navy font-cormorant font-semibold">Purchase</span>
                     </button>
                   </div>
                   
-                  <div className="space-y-3">
+                  <div className="space-y-3 animate-fade-in" style={{ animationDelay: '0.4s' }}>
                     <h3 className="text-gold text-xl font-cormorant">Digital Edition</h3>
                     <p className="text-antique/80">Instant access on all your devices</p>
                     <p className="text-2xl font-cormorant text-gold">$19.99</p>
-                    <button className="relative group w-full max-w-[180px]">
-                      <img src="/textures/wax-seal-2.png" alt="Purchase" className="w-full h-auto transition-transform group-hover:scale-105" />
+                    <button className="relative group w-full max-w-[180px] hover:scale-105 transition-transform duration-300">
+                      <img src="/textures/wax-seal-2.png" alt="Purchase" className="w-full h-auto" />
                       <span className="absolute inset-0 flex items-center justify-center text-navy font-cormorant font-semibold">Purchase</span>
                     </button>
                   </div>
                 </div>
                 
-                <div className="flex items-center space-x-4 text-antique/70 text-sm mt-6">
+                <div className="flex items-center flex-wrap gap-4 text-antique/70 text-sm mt-6 animate-fade-in" style={{ animationDelay: '0.6s' }}>
                   <span>Free shipping on orders over $50</span>
-                  <span className="h-1 w-1 bg-gold rounded-full"></span>
+                  <span className="h-1 w-1 bg-gold rounded-full hidden md:block"></span>
                   <span>30-day money back guarantee</span>
                 </div>
               </div>
               
-              <div className="book-page p-8 relative overflow-hidden">
+              <div className="book-page p-8 relative overflow-hidden animate-fade-in" style={{ animationDelay: '0.8s' }}>
                 <h3 className="text-2xl font-cormorant font-bold text-gold mb-4">Sample Chapter</h3>
                 <div className="border-l-2 border-gold/30 pl-6 text-ivory/90 font-baskerville">
                   <p className="mb-4 first-letter:text-3xl first-letter:font-bold first-letter:text-gold first-letter:mr-1 first-letter:float-left">
@@ -228,7 +228,7 @@ const Index = () => {
       
       {/* Author Quote */}
       <section className="py-20 px-4 bg-forest/10">
-        <div className="container mx-auto max-w-3xl text-center">
+        <div className="container mx-auto max-w-3xl text-center animate-fade-in">
           <svg className="w-12 h-12 mx-auto text-gold/50 mb-6" fill="currentColor" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
           </svg>
@@ -244,7 +244,7 @@ const Index = () => {
       {/* Newsletter CTA */}
       <section className="py-20 px-4">
         <div className="container mx-auto max-w-4xl">
-          <div className="book-page p-10 text-center">
+          <div className="book-page p-10 text-center animate-fade-in" style={{ animationDelay: '0.2s' }}>
             <h2 className="text-3xl font-cormorant font-bold text-gold mb-4">
               Join the Journey
             </h2>
