@@ -50,6 +50,10 @@ const Index = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Calculate the maximum translation value to limit the book's movement
+  const maxTranslateX = '40vw';
+  const translateX = Math.min(scrollY * 0.1, parseInt(maxTranslateX));
+
   return (
     <div className="min-h-screen flex flex-col">
       {/* Hero Section with 3D Book */}
@@ -136,8 +140,7 @@ const Index = () => {
         className={`fixed left-0 top-1/2 transform -translate-y-1/2 w-[300px] h-[400px] z-30 transition-opacity duration-500 pointer-events-none
           ${bookFixed ? 'opacity-100' : 'opacity-0'}`}
         style={{
-          transform: `translate3d(calc(${scrollY * 0.1}px), -50%, 0)`,
-          maxTranslateX: '40vw'
+          transform: `translate3d(${Math.min(scrollY * 0.1, parseInt(maxTranslateX))}px, -50%, 0)`
         }}
       >
         <Hero3DBook 
