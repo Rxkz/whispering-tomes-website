@@ -67,7 +67,16 @@ const Hero3DBook = ({
     
     // Create book cover material with texture
     const textureLoader = new THREE.TextureLoader();
-    const coverTexture = textureLoader.load(coverImage);
+    
+    // Improved texture loading with proper handling
+    const coverTexture = textureLoader.load(coverImage, (texture) => {
+      // Set proper texture properties once loaded to avoid grey areas
+      texture.minFilter = THREE.LinearFilter;
+      texture.magFilter = THREE.LinearFilter;
+      texture.encoding = THREE.sRGBEncoding;
+      texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+      renderer.render(scene, camera); // Re-render once texture is properly loaded
+    });
     
     // Create book materials
     const coverMaterial = new THREE.MeshStandardMaterial({
