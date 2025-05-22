@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import Hero3DBook from '../components/Hero3DBook';
@@ -81,8 +80,9 @@ const Index = () => {
             <div className="h-[500px]">
               <Hero3DBook 
                 isHovered={bookHovered} 
-                bookTitle="The Secret Library" 
-                bookAuthor="Author Name"
+                bookTitle="MADE OF NOISE" 
+                bookAuthor="K BENISTON"
+                coverImage="/lovable-uploads/446e47f7-c0e9-4bb5-b401-ec4e04a953a0.png"
               />
             </div>
           </div>
@@ -109,7 +109,30 @@ const Index = () => {
           </h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[1, 2, 3].map((book) => (
+            {/* First featured book - MADE OF NOISE */}
+            <div className="relative group">
+              <div className="book-page h-full transform group-hover:-translate-y-2 transition-transform duration-300">
+                <div className="aspect-[2/3] bg-forest/20 mb-4 overflow-hidden">
+                  <img 
+                    src="/lovable-uploads/446e47f7-c0e9-4bb5-b401-ec4e04a953a0.png" 
+                    alt="MADE OF NOISE by K BENISTON" 
+                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-300"
+                  />
+                </div>
+                <h3 className="text-2xl font-cormorant font-semibold text-gold">MADE OF NOISE</h3>
+                <p className="text-sm text-ivory/70 mt-2">
+                  A captivating journey through ancient mysteries and forgotten knowledge.
+                </p>
+                <div className="mt-4">
+                  <Link to="/books" className="text-gold hover:text-ivory transition-colors duration-300 text-sm uppercase tracking-wider font-cormorant">
+                    Discover More &rarr;
+                  </Link>
+                </div>
+              </div>
+            </div>
+            
+            {/* Keep the other two book items */}
+            {[2, 3].map((book) => (
               <div 
                 key={book}
                 className="relative group"
@@ -148,7 +171,7 @@ const Index = () => {
             In the silence of ancient libraries, whispers of forgotten wisdom await those who dare to listen. The pages of history hold secrets that transcend time itself.
           </blockquote>
           <div className="mt-6">
-            <p className="text-gold font-cormorant text-xl">Author Name</p>
+            <p className="text-gold font-cormorant text-xl">K BENISTON</p>
           </div>
         </div>
       </section>

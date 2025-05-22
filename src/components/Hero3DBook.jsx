@@ -209,7 +209,7 @@ const Hero3DBook = ({
       
       renderer.dispose();
     };
-  }, [isMobile]);
+  }, [isMobile, coverImage, isHovered, isOpened]);
   
   return (
     <div className="relative w-full h-full">
