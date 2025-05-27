@@ -1,12 +1,15 @@
 
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Book, User, Paintbrush, Home } from 'lucide-react';
+import { Book, User, Paintbrush, Home, LogIn, LogOut, Shield } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { Button } from './ui/button';
 
 const Navigation = () => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
+  const { user, isAdmin, signOut } = useAuth();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -30,6 +33,14 @@ const Navigation = () => {
     return location.pathname === path;
   };
 
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
   return (
     <nav 
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-500 ${
@@ -41,7 +52,7 @@ const Navigation = () => {
           to="/" 
           className="font-cormorant text-2xl font-semibold text-gold tracking-widest"
         >
-          AUTHOR NAME
+          E-LIBRARY
         </Link>
         
         {/* Mobile menu button */}
@@ -62,7 +73,7 @@ const Navigation = () => {
         </button>
         
         {/* Desktop menu */}
-        <div className="hidden md:flex space-x-8">
+        <div className="hidden md:flex items-center space-x-8">
           <Link 
             to="/" 
             className={`nav-item flex items-center gap-1 ${isActive('/') ? 'text-gold border-b border-gold' : ''}`}
@@ -91,13 +102,47 @@ const Navigation = () => {
             <Paintbrush size={16} />
             <span>Gallery</span>
           </Link>
+          
+          {user ? (
+            <div className="flex items-center space-x-4">
+              {isAdmin && (
+                <Link 
+                  to="/admin" 
+                  className={`nav-item flex items-center gap-1 ${isActive('/admin') ? 'text-gold border-b border-gold' : ''}`}
+                >
+                  <Shield size={16} />
+                  <span>Admin</span>
+                </Link>
+              )}
+              <Button
+                onClick={handleSignOut}
+                variant="outline"
+                size="sm"
+                className="border-gold text-gold hover:bg-gold hover:text-navy"
+              >
+                <LogOut size={16} className="mr-1" />
+                Sign Out
+              </Button>
+            </div>
+          ) : (
+            <Link to="/auth">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-gold text-gold hover:bg-gold hover:text-navy"
+              >
+                <LogIn size={16} className="mr-1" />
+                Login
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
       
       {/* Mobile menu */}
       <div 
         className={`md:hidden absolute w-full bg-navy/95 backdrop-blur-lg transition-all duration-300 overflow-hidden ${
-          menuOpen ? 'max-h-60 border-b border-gold/30' : 'max-h-0'
+          menuOpen ? 'max-h-80 border-b border-gold/30' : 'max-h-0'
         }`}
       >
         <div className="container mx-auto px-4 py-4 flex flex-col space-y-4">
@@ -133,6 +178,40 @@ const Navigation = () => {
             <Paintbrush size={16} />
             <span>Gallery</span>
           </Link>
+          
+          {user ? (
+            <>
+              {isAdmin && (
+                <Link 
+                  to="/admin" 
+                  className={`nav-item flex items-center gap-2 ${isActive('/admin') ? 'text-gold' : ''}`}
+                  onClick={() => setMenuOpen(false)}
+                >
+                  <Shield size={16} />
+                  <span>Admin</span>
+                </Link>
+              )}
+              <button
+                onClick={() => {
+                  handleSignOut();
+                  setMenuOpen(false);
+                }}
+                className="nav-item flex items-center gap-2 text-left"
+              >
+                <LogOut size={16} />
+                <span>Sign Out</span>
+              </button>
+            </>
+          ) : (
+            <Link 
+              to="/auth" 
+              className="nav-item flex items-center gap-2"
+              onClick={() => setMenuOpen(false)}
+            >
+              <LogIn size={16} />
+              <span>Login</span>
+            </Link>
+          )}
         </div>
       </div>
     </nav>
