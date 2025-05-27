@@ -2,22 +2,11 @@
 import { useState } from 'react';
 import Hero3DBook from '../components/Hero3DBook';
 
-interface Book {
-  id: number;
-  title: string;
-  cover: string;
-  description: string;
-  price: string;
-  releaseDate: string;
-  pages: number;
-  excerpt: string;
-}
-
 const Books = () => {
-  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [selectedBook, setSelectedBook] = useState(null);
   const [openBook, setOpenBook] = useState(false);
   
-  const books: Book[] = [
+  const books = [
     {
       id: 1,
       title: "The Secret Library",
@@ -50,7 +39,7 @@ const Books = () => {
     }
   ];
   
-  const handleBookClick = (book: Book) => {
+  const handleBookClick = (book) => {
     setSelectedBook(book);
     setTimeout(() => setOpenBook(true), 300);
   };
