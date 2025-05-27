@@ -114,17 +114,18 @@ const Auth = () => {
             </div>
             <Button 
               type="submit" 
-              className="w-full bg-gold hover:bg-gold/90 text-navy"
+              className="w-full bg-gold hover:bg-gold/90 text-navy font-semibold py-3 text-base"
               disabled={loading}
+              size="lg"
             >
-              {loading ? 'Processing...' : (isSignUp ? 'Sign Up' : 'Sign In')}
+              {loading ? 'Processing...' : (isSignUp ? 'Create Account' : 'Sign In')}
             </Button>
           </form>
-          <div className="mt-4 text-center">
+          <div className="mt-6 text-center">
             <button
               type="button"
               onClick={() => setIsSignUp(!isSignUp)}
-              className="text-sm text-gold hover:underline"
+              className="text-sm text-gold hover:underline font-medium"
             >
               {isSignUp 
                 ? 'Already have an account? Sign in' 
