@@ -132,7 +132,7 @@ const Navigation = () => {
                 className="border-gold text-gold hover:bg-gold hover:text-navy"
               >
                 <LogIn size={16} className="mr-1" />
-                Sign In
+                Login
               </Button>
             </Link>
           )}
@@ -209,7 +209,7 @@ const Navigation = () => {
               onClick={() => setMenuOpen(false)}
             >
               <LogIn size={16} />
-              <span>Sign In</span>
+              <span>Login</span>
             </Link>
           )}
         </div>
