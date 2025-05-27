@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { useIsMobile } from '../hooks/use-mobile';
@@ -7,7 +6,7 @@ const Hero3DBook = ({
   isHovered = false, 
   isOpened = false, 
   bookTitle = "The Secret Library", 
-  bookAuthor = "Author Name",
+  bookAuthor = "Kia Beniston",
   coverImage = "/textures/book-cover.jpg" 
 }) => {
   const containerRef = useRef(null);

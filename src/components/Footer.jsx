@@ -1,4 +1,3 @@
-
 import { Mail, Facebook, Instagram, Twitter } from 'lucide-react';
 
 const Footer = () => {
@@ -8,7 +7,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           {/* Author Information */}
           <div className="space-y-4">
-            <h3 className="text-gold font-cormorant text-2xl font-semibold tracking-wider">AUTHOR NAME</h3>
+            <h3 className="text-gold font-cormorant text-2xl font-semibold tracking-wider">Kia Beniston</h3>
             <p className="text-antique/70 max-w-md">
               Crafting worlds of mystery and wonder through the written word, 
               exploring the depths of imagination and the heights of human experience.
@@ -66,7 +65,7 @@ const Footer = () => {
         </div>
         
         <div className="border-t border-gold/20 mt-8 pt-8 text-center text-antique/50 text-sm">
-          <p>&copy; {new Date().getFullYear()} Author Name. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Kia Beniston. All rights reserved.</p>
         </div>
       </div>
     </footer>

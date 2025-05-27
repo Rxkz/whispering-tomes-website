@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import Hero3DBook from '../components/Hero3DBook';
 
@@ -72,18 +71,57 @@ const Books = () => {
         
         {/* Books Display */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 max-w-6xl mx-auto">
-          {books.map((book) => (
+          {books.map((book, idx) => (
             <div 
               key={book.id} 
               className="flex flex-col book-page overflow-hidden transform hover:-translate-y-1 transition-transform duration-300 cursor-pointer"
               onClick={() => handleBookClick(book)}
             >
-              <div className="aspect-[2/3] relative overflow-hidden mb-4">
-                <img 
-                  src={book.cover} 
-                  alt={book.title} 
-                  className="w-full h-full object-cover"
-                />
+              <div className="aspect-[2/3] relative overflow-hidden mb-4 flex items-center justify-center">
+                {idx === 0 && (
+                  <iframe
+                    src="/3dbook.html?cover=cover.jpg&title=The%20Secret%20Library&color=2dd4bf&txtcolor=ffffff"
+                    title="3D Book Card The Secret Library"
+                    width="100%"
+                    height="420"
+                    className="w-full h-[420px]"
+                    style={{ border: 'none', background: 'transparent', pointerEvents: 'auto' }}
+                    allowFullScreen
+                  />
+                )}
+                {idx === 1 && (
+                  <iframe
+                    src="/3dbook.html?cover=cr7.jpg&title=Ronaldo&color=1abc9c&txtcolor=ffffff"
+                    title="3D Book Card Ronaldo"
+                    width="100%"
+                    height="420"
+                    className="w-full h-[420px]"
+                    style={{ border: 'none', background: 'transparent', pointerEvents: 'auto' }}
+                    allowFullScreen
+                  />
+                )}
+                {idx === 2 && (
+                  <iframe
+                    src="/3dbook.html?cover=messi.jpg&title=Messi&color=f1c40f&txtcolor=000000"
+                    title="3D Book Card Messi"
+                    width="100%"
+                    height="420"
+                    className="w-full h-[420px]"
+                    style={{ border: 'none', background: 'transparent', pointerEvents: 'auto' }}
+                    allowFullScreen
+                  />
+                )}
+                {idx > 2 && (
+                  <iframe
+                    src={`/3dbook.html?cover=${encodeURIComponent(book.cover.replace(/^\//, ''))}&title=${encodeURIComponent(book.title)}&color=2dd4bf&txtcolor=ffffff`}
+                    title={`3D Book Card ${book.title}`}
+                    width="100%"
+                    height="420"
+                    className="w-full h-[420px]"
+                    style={{ border: 'none', background: 'transparent', pointerEvents: 'auto' }}
+                    allowFullScreen
+                  />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-navy/90 to-transparent flex items-end p-4">
                   <h2 className="text-gold text-xl font-cormorant font-semibold">{book.title}</h2>
                 </div>
@@ -120,12 +158,50 @@ const Books = () => {
               <div className="grid grid-cols-1 md:grid-cols-2">
                 {/* 3D Book Display */}
                 <div className="h-[500px] bg-navy/50 flex items-center justify-center">
-                  <Hero3DBook 
-                    isOpened={openBook}
-                    bookTitle={selectedBook.title}
-                    bookAuthor="Author Name"
-                    coverImage={selectedBook.cover}
-                  />
+                  {selectedBook && selectedBook.id === 1 && (
+                    <iframe
+                      src="/3dbook.html?cover=cover.jpg&title=The%20Secret%20Library&color=2dd4bf&txtcolor=ffffff"
+                      title="3D Book Card The Secret Library"
+                      width="100%"
+                      height="500"
+                      className="w-full h-[500px]"
+                      style={{ border: 'none', background: 'transparent', pointerEvents: 'auto' }}
+                      allowFullScreen
+                    />
+                  )}
+                  {selectedBook && selectedBook.id === 2 && (
+                    <iframe
+                      src="/3dbook.html?cover=cr7.jpg&title=Ronaldo&color=1abc9c&txtcolor=ffffff"
+                      title="3D Book Card Ronaldo"
+                      width="100%"
+                      height="500"
+                      className="w-full h-[500px]"
+                      style={{ border: 'none', background: 'transparent', pointerEvents: 'auto' }}
+                      allowFullScreen
+                    />
+                  )}
+                  {selectedBook && selectedBook.id === 3 && (
+                    <iframe
+                      src="/3dbook.html?cover=messi.jpg&title=Messi&color=f1c40f&txtcolor=000000"
+                      title="3D Book Card Messi"
+                      width="100%"
+                      height="500"
+                      className="w-full h-[500px]"
+                      style={{ border: 'none', background: 'transparent', pointerEvents: 'auto' }}
+                      allowFullScreen
+                    />
+                  )}
+                  {selectedBook && selectedBook.id > 3 && (
+                    <iframe
+                      src={`/3dbook.html?cover=${encodeURIComponent(selectedBook.cover.replace(/^\//, ''))}&title=${encodeURIComponent(selectedBook.title)}&color=2dd4bf&txtcolor=ffffff`}
+                      title={`3D Book Card ${selectedBook.title}`}
+                      width="100%"
+                      height="500"
+                      className="w-full h-[500px]"
+                      style={{ border: 'none', background: 'transparent', pointerEvents: 'auto' }}
+                      allowFullScreen
+                    />
+                  )}
                 </div>
                 
                 {/* Book Details */}

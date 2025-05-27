@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>3D Book</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            overflow: hidden;
+        }
+        #container {
+            width: 100vw;
+            height: 100vh;
+        }
+        canvas {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <canvas id="book3d"></canvas>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    
+    <script>
+        // --- Add dynamic cover/title support ---
+        function getBookParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                cover: params.get('cover') || 'cover.jpg',
+                title: params.get('title') || 'MADE OF NOISE',
+                color: params.get('color') || '2dd4bf',
+                txtcolor: params.get('txtcolor') || 'ffffff' // default to white
+            };
+        }
+        const { cover, title, color, txtcolor } = getBookParams();
+        // --- End dynamic support ---
+
+        let scene, camera, renderer, book;
+        let mouse = { x: 0, y: 0 };
+        let isDragging = false;
+
+        function init() {
+            // Scene setup
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 1000);
+            renderer = new THREE.WebGLRenderer({ 
+                canvas: document.getElementById('book3d'),
+                antialias: true,
+                alpha: true
+            });
+            
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.setClearColor(0x000000, 0);
+
+            // Lighting setup
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.4);
+            scene.add(ambientLight);
+
+            const mainLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            mainLight.position.set(10, 10, 5);
+            mainLight.castShadow = true;
+            mainLight.shadow.mapSize.width = 2048;
+            mainLight.shadow.mapSize.height = 2048;
+            scene.add(mainLight);
+
+            const fillLight = new THREE.DirectionalLight(0x4488ff, 0.4);
+            fillLight.position.set(-5, 5, -5);
+            scene.add(fillLight);
+
+            // Create book
+            createBook();
+            
+            // Camera position
+            camera.position.set(0, 2, 8);
+            camera.lookAt(0, 0, 0);
+
+            // Controls
+            setupControls();
+            
+            // Animation
+            animate();
+        }
+
+        function createBook() {
+            book = new THREE.Group();
+
+            // Book dimensions
+            const width = 3;
+            const height = 4;
+            const depth = 0.6;
+
+            // Load cover image (dynamic)
+            const textureLoader = new THREE.TextureLoader();
+            const coverTexture = textureLoader.load(
+                './' + cover,
+                function(texture) {
+                    texture.flipY = true;
+                }
+            );
+
+            // Cover material (add gloss)
+            const coverMaterial = new THREE.MeshPhysicalMaterial({
+                map: coverTexture,
+                roughness: 0.3,
+                metalness: 0.2,
+                clearcoat: 0.6,
+                clearcoatRoughness: 0.1
+            });
+
+            // Spine text as canvas texture (dynamic)
+            function makeSpineTexture() {
+                const canvas = document.createElement('canvas');
+                canvas.width = 256;
+                canvas.height = 1024;
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#' + color;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.save();
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                ctx.rotate(-Math.PI / 2);
+                ctx.font = 'bold 60px Arial';
+                ctx.fillStyle = '#' + txtcolor;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.shadowColor = '#00ffff';
+                ctx.shadowBlur = 10;
+                ctx.fillText(title, 0, 0); // Use dynamic title
+                ctx.restore();
+                return new THREE.CanvasTexture(canvas);
+            }
+            const spineTexture = makeSpineTexture();
+
+            // Materials
+            const spineMaterial = new THREE.MeshLambertMaterial({ map: spineTexture });
+            const edgeMaterial = new THREE.MeshLambertMaterial({ color: '#' + color });
+
+            // Book cover geometry
+            const coverGeometry = new THREE.BoxGeometry(width, height, 0.05);
+
+            // Front cover
+            const frontCover = new THREE.Mesh(coverGeometry, [
+                spineMaterial, // right
+                spineMaterial, // left  
+                edgeMaterial,  // top
+                edgeMaterial,  // bottom
+                coverMaterial, // front
+                coverMaterial  // back
+            ]);
+            frontCover.position.z = depth/2;
+            frontCover.castShadow = true;
+            book.add(frontCover);
+
+            // Back cover
+            const backCover = new THREE.Mesh(coverGeometry, [
+                spineMaterial,
+                spineMaterial,
+                edgeMaterial,
+                edgeMaterial,
+                coverMaterial,
+                coverMaterial
+            ]);
+            backCover.position.z = -depth/2;
+            backCover.castShadow = true;
+            book.add(backCover);
+
+            // Pages
+            const pageGeometry = new THREE.BoxGeometry(width - 0.1, height - 0.1, depth - 0.1);
+            const pageMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0xfaf3e3,
+                transparent: true,
+                opacity: 0.95
+            });
+            const pages = new THREE.Mesh(pageGeometry, pageMaterial);
+            pages.castShadow = true;
+            pages.receiveShadow = true;
+            book.add(pages);
+
+            // Spine
+            const spineGeometry = new THREE.BoxGeometry(depth, height, 0.05);
+            const spine = new THREE.Mesh(spineGeometry, spineMaterial);
+            spine.rotation.y = Math.PI / 2;
+            spine.position.x = -width/2;
+            spine.castShadow = true;
+            book.add(spine);
+
+            scene.add(book);
+
+            // Initial position and rotation
+            book.rotation.set(-0.3, 0.2, 0);
+            book.position.y = -0.5;
+
+            // GSAP animations
+            gsap.to(book.rotation, {
+                duration: 20,
+                y: Math.PI * 2,
+                repeat: -1,
+                ease: "none"
+            });
+
+            gsap.to(book.position, {
+                duration: 4,
+                y: 0.5,
+                repeat: -1,
+                yoyo: true,
+                ease: "power2.inOut"
+            });
+        }
+
+        function setupControls() {
+            const canvas = document.getElementById('book3d');
+            
+            canvas.addEventListener('mousedown', onMouseDown);
+            canvas.addEventListener('mousemove', onMouseMove);
+            canvas.addEventListener('mouseup', onMouseUp);
+            canvas.addEventListener('wheel', onWheel);
+            
+            // Touch controls
+            canvas.addEventListener('touchstart', onTouchStart);
+            canvas.addEventListener('touchmove', onTouchMove);
+            canvas.addEventListener('touchend', onTouchEnd);
+        }
+
+        function onMouseDown(event) {
+            isDragging = true;
+            mouse.x = event.clientX;
+            mouse.y = event.clientY;
+            
+            // Pause auto-rotation
+            gsap.killTweensOf(book.rotation);
+        }
+
+        function onMouseMove(event) {
+            if (!isDragging) return;
+            
+            const deltaX = event.clientX - mouse.x;
+            const deltaY = event.clientY - mouse.y;
+            
+            gsap.to(book.rotation, {
+                duration: 0.3,
+                x: book.rotation.x + deltaY * 0.01,
+                y: book.rotation.y + deltaX * 0.01,
+                ease: "power2.out"
+            });
+            
+            mouse.x = event.clientX;
+            mouse.y = event.clientY;
+        }
+
+        function onMouseUp() {
+            isDragging = false;
+            
+            // Resume auto-rotation
+            gsap.to(book.rotation, {
+                duration: 20,
+                y: book.rotation.y + Math.PI * 2,
+                repeat: -1,
+                ease: "none"
+            });
+        }
+
+        function onWheel(event) {
+            event.preventDefault();
+            const zoom = event.deltaY * 0.001;
+            
+            gsap.to(camera.position, {
+                duration: 0.5,
+                z: Math.max(4, Math.min(15, camera.position.z + zoom)),
+                ease: "power2.out"
+            });
+        }
+
+        function onTouchStart(event) {
+            event.preventDefault();
+            if (event.touches.length === 1) {
+                mouse.x = event.touches[0].clientX;
+                mouse.y = event.touches[0].clientY;
+                isDragging = true;
+                gsap.killTweensOf(book.rotation);
+            }
+        }
+
+        function onTouchMove(event) {
+            event.preventDefault();
+            if (isDragging && event.touches.length === 1) {
+                const deltaX = event.touches[0].clientX - mouse.x;
+                const deltaY = event.touches[0].clientY - mouse.y;
+                
+                gsap.to(book.rotation, {
+                    duration: 0.3,
+                    x: book.rotation.x + deltaY * 0.01,
+                    y: book.rotation.y + deltaX * 0.01,
+                    ease: "power2.out"
+                });
+                
+                mouse.x = event.touches[0].clientX;
+                mouse.y = event.touches[0].clientY;
+            }
+        }
+
+        function onTouchEnd(event) {
+            event.preventDefault();
+            isDragging = false;
+            gsap.to(book.rotation, {
+                duration: 20,
+                y: book.rotation.y + Math.PI * 2,
+                repeat: -1,
+                ease: "none"
+            });
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            renderer.render(scene, camera);
+        }
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Initialize
+        init();
+    </script>
+</body>
+</html>

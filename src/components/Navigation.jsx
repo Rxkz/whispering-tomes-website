@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Book, User, Paintbrush, Home, LogIn, LogOut, Shield } from 'lucide-react';
@@ -50,9 +49,9 @@ const Navigation = () => {
       <div className="container mx-auto px-4 flex justify-between items-center">
         <Link 
           to="/" 
-          className="font-cormorant text-2xl font-semibold text-gold tracking-widest"
+          className="font-cormorant text-3xl font-semibold text-gold tracking-widest uppercase"
         >
-          E-LIBRARY
+          KIA BENISTON
         </Link>
         
         {/* Mobile menu button */}

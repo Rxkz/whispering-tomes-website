@@ -1,7 +1,5 @@
-
 import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import Hero3DBook from '../components/Hero3DBook';
 
 const Index = () => {
   const [bookHovered, setBookHovered] = useState(false);
@@ -79,10 +77,13 @@ const Index = () => {
             </div>
             
             <div className="h-[500px]">
-              <Hero3DBook 
-                isHovered={bookHovered} 
-                bookTitle="The Secret Library" 
-                bookAuthor="Author Name"
+              <iframe 
+                src="/3dbook.html" 
+                title="3D Book" 
+                width="100%" 
+                height="500" 
+                style={{ border: 'none', background: 'transparent' }}
+                allowFullScreen
               />
             </div>
           </div>

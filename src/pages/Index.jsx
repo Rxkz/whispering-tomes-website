@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import Hero3DBook from '../components/Hero3DBook';
 
 const Index = () => {
   const [bookHovered, setBookHovered] = useState(false);
@@ -13,7 +12,7 @@ const Index = () => {
     
     const particles = Array.from({ length: 20 }, (_, index) => ({
       id: index,
-      size: Math.random() * 3 + 1,
+      size: Math.random() * 3 + 1, // 3 to 5px
       x: Math.random() * 100,
       y: Math.random() * 100,
       delay: Math.random() * 5
@@ -41,7 +40,11 @@ const Index = () => {
               height: `${particle.size}px`,
               left: `${particle.x}%`,
               top: `${particle.y}%`,
-              opacity: 0,
+              opacity: 0.85,
+              background: 'radial-gradient(circle, #FFD700 60%, #fffbe6 100%)',
+              borderRadius: '50%',
+              boxShadow: '0 0 12px 4px #FFD700, 0 0 24px 8px #fffbe6',
+              position: 'absolute',
               animationDelay: `${particle.delay}s`,
               '--dust-x': `${(Math.random() * 200) - 100}px`,
               '--dust-y': `${(Math.random() * 200) - 100}px`
@@ -77,13 +80,24 @@ const Index = () => {
               </div>
             </div>
             
-            <div className="h-[500px]">
-              <Hero3DBook 
-                isHovered={bookHovered} 
-                bookTitle="MADE OF NOISE" 
-                bookAuthor="K BENISTON"
-                coverImage="/lovable-uploads/446e47f7-c0e9-4bb5-b401-ec4e04a953a0.png"
-              />
+            {/* 3D Book with wiggle and scale on hover, responsive and shifted right on desktop */}
+            <div 
+              className="group flex items-center justify-center transition-transform duration-300 h-[700px] w-[130%] ml-0 md:ml-12 lg:ml-24 mx-auto md:h-[700px] md:w-[130%] sm:h-[400px] sm:w-full sm:ml-0" 
+            >
+              <div 
+                className="w-full h-full transition-transform duration-500 ease-in-out group-hover:scale-105 group-hover:animate-wiggle"
+                style={{ willChange: 'transform' }}
+              >
+                <iframe 
+                  src="/3dbook.html" 
+                  title="3D Book" 
+                  width="100%" 
+                  height="700" 
+                  className="sm:h-[400px] md:h-[700px]"
+                  style={{ border: 'none', background: 'transparent', pointerEvents: 'auto' }}
+                  allowFullScreen
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -112,11 +126,15 @@ const Index = () => {
             {/* First featured book - MADE OF NOISE */}
             <div className="relative group">
               <div className="book-page h-full transform group-hover:-translate-y-2 transition-transform duration-300">
-                <div className="aspect-[2/3] bg-forest/20 mb-4 overflow-hidden">
-                  <img 
-                    src="/lovable-uploads/446e47f7-c0e9-4bb5-b401-ec4e04a953a0.png" 
-                    alt="MADE OF NOISE by K BENISTON" 
-                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-300"
+                <div className="aspect-[2/3] bg-forest/20 mb-4 overflow-hidden flex items-center justify-center">
+                  <iframe
+                    src="/3dbook.html?cover=cover.jpg&title=MADE%20OF%20NOISE"
+                    title="3D Book Card Made of Noise"
+                    width="100%"
+                    height="500"
+                    className="w-full h-[500px]"
+                    style={{ border: 'none', background: 'transparent', pointerEvents: 'auto' }}
+                    allowFullScreen
                   />
                 </div>
                 <h3 className="text-2xl font-cormorant font-semibold text-gold">MADE OF NOISE</h3>
@@ -130,33 +148,56 @@ const Index = () => {
                 </div>
               </div>
             </div>
-            
-            {/* Keep the other two book items */}
-            {[2, 3].map((book) => (
-              <div 
-                key={book}
-                className="relative group"
-              >
-                <div className="book-page h-full transform group-hover:-translate-y-2 transition-transform duration-300">
-                  <div className="aspect-[2/3] bg-forest/20 mb-4 overflow-hidden">
-                    <img 
-                      src={`/textures/book-cover-${book}.jpg`} 
-                      alt={`Book ${book}`} 
-                      className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-300"
-                    />
-                  </div>
-                  <h3 className="text-2xl font-cormorant font-semibold text-gold">Book Title {book}</h3>
-                  <p className="text-sm text-ivory/70 mt-2">
-                    A captivating journey through ancient mysteries and forgotten knowledge.
-                  </p>
-                  <div className="mt-4">
-                    <Link to="/books" className="text-gold hover:text-ivory transition-colors duration-300 text-sm uppercase tracking-wider font-cormorant">
-                      Discover More &rarr;
-                    </Link>
-                  </div>
+            {/* Book 2 - Ronaldo */}
+            <div className="relative group">
+              <div className="book-page h-full transform group-hover:-translate-y-2 transition-transform duration-300">
+                <div className="aspect-[2/3] bg-forest/20 mb-4 overflow-hidden flex items-center justify-center">
+                  <iframe
+                    src="/3dbook.html?cover=cr7.jpg&title=Ronaldo&color=f1c40f&txtcolor=000000"
+                    title="3D Book Card Ronaldo"
+                    width="100%"
+                    height="500"
+                    className="w-full h-[500px]"
+                    style={{ border: 'none', background: 'transparent', pointerEvents: 'auto' }}
+                    allowFullScreen
+                  />
+                </div>
+                <h3 className="text-2xl font-cormorant font-semibold text-gold">Ronaldo</h3>
+                <p className="text-sm text-ivory/70 mt-2">
+                  A captivating journey through ancient mysteries and forgotten knowledge.
+                </p>
+                <div className="mt-4">
+                  <Link to="/books" className="text-gold hover:text-ivory transition-colors duration-300 text-sm uppercase tracking-wider font-cormorant">
+                    Discover More &rarr;
+                  </Link>
                 </div>
               </div>
-            ))}
+            </div>
+            {/* Book 3 - Messi */}
+            <div className="relative group">
+              <div className="book-page h-full transform group-hover:-translate-y-2 transition-transform duration-300">
+                <div className="aspect-[2/3] bg-forest/20 mb-4 overflow-hidden flex items-center justify-center">
+                  <iframe
+                    src="/3dbook.html?cover=messi.jpg&title=Messi&color=f1c40f"
+                    title="3D Book Card Messi"
+                    width="100%"
+                    height="500"
+                    className="w-full h-[500px]"
+                    style={{ border: 'none', background: 'transparent', pointerEvents: 'auto' }}
+                    allowFullScreen
+                  />
+                </div>
+                <h3 className="text-2xl font-cormorant font-semibold text-gold">Messi</h3>
+                <p className="text-sm text-ivory/70 mt-2">
+                  A captivating journey through ancient mysteries and forgotten knowledge.
+                </p>
+                <div className="mt-4">
+                  <Link to="/books" className="text-gold hover:text-ivory transition-colors duration-300 text-sm uppercase tracking-wider font-cormorant">
+                    Discover More &rarr;
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -208,3 +249,17 @@ const Index = () => {
 };
 
 export default Index;
+
+<style jsx global>{`
+@keyframes wiggle {
+  0% { transform: rotate(-2deg) scale(1.05); }
+  20% { transform: rotate(2deg) scale(1.07); }
+  40% { transform: rotate(-2deg) scale(1.09); }
+  60% { transform: rotate(2deg) scale(1.07); }
+  80% { transform: rotate(-2deg) scale(1.05); }
+  100% { transform: rotate(0deg) scale(1.05); }
+}
+.animate-wiggle {
+  animation: wiggle 0.7s ease-in-out;
+}
+`}</style>

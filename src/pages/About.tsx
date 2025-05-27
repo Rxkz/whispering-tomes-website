@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 
 const About = () => {
@@ -6,7 +5,7 @@ const About = () => {
   
   useEffect(() => {
     const image = new Image();
-    image.src = '/textures/author-portrait.jpg';
+    image.src = '/Goat.jpg';
     image.onload = () => setIsImageLoaded(true);
   }, []);
 
@@ -28,8 +27,8 @@ const About = () => {
               <div className="ornate-frame">
                 <div className={`relative transition-opacity duration-1000 ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}>
                   <img 
-                    src="/textures/author-portrait.jpg" 
-                    alt="Author Portrait" 
+                    src="public\Goat.jpg" 
+                    alt="Kia Beniston" 
                     className="rounded-sm"
                   />
                   <div className="absolute inset-0 bg-gold/10 mix-blend-overlay"></div>
@@ -39,7 +38,7 @@ const About = () => {
             
             {/* Author Bio */}
             <div className="space-y-6 text-ivory/90">
-              <h2 className="font-cormorant text-3xl font-semibold text-gold">Author Name</h2>
+              <h2 className="font-cormorant text-3xl font-semibold text-gold">Kia Beniston</h2>
               <div className="space-y-4">
                 <p>
                   Born in the misty valleys of a forgotten countryside, I developed an early fascination with ancient manuscripts and the stories they contained. 
