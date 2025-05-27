@@ -79,61 +79,56 @@ const Navigation = () => {
             className={`nav-item flex items-center gap-1 ${isActive('/') ? 'text-gold border-b border-gold' : ''}`}
           >
             <Home size={16} />
-            <span>Home</span>
+            <span>HOME</span>
           </Link>
           <Link 
             to="/about" 
             className={`nav-item flex items-center gap-1 ${isActive('/about') ? 'text-gold border-b border-gold' : ''}`}
           >
             <User size={16} />
-            <span>About</span>
+            <span>ABOUT</span>
           </Link>
           <Link 
             to="/books" 
             className={`nav-item flex items-center gap-1 ${isActive('/books') ? 'text-gold border-b border-gold' : ''}`}
           >
             <Book size={16} />
-            <span>Books</span>
+            <span>BOOKS</span>
           </Link>
           <Link 
             to="/gallery" 
             className={`nav-item flex items-center gap-1 ${isActive('/gallery') ? 'text-gold border-b border-gold' : ''}`}
           >
             <Paintbrush size={16} />
-            <span>Gallery</span>
+            <span>GALLERY</span>
           </Link>
           
           {user ? (
-            <div className="flex items-center space-x-4">
+            <>
               {isAdmin && (
                 <Link 
                   to="/admin" 
                   className={`nav-item flex items-center gap-1 ${isActive('/admin') ? 'text-gold border-b border-gold' : ''}`}
                 >
                   <Shield size={16} />
-                  <span>Admin</span>
+                  <span>ADMIN</span>
                 </Link>
               )}
-              <Button
+              <button
                 onClick={handleSignOut}
-                variant="outline"
-                size="sm"
-                className="border-gold text-gold hover:bg-gold hover:text-navy"
+                className="nav-item flex items-center gap-1 text-gold hover:text-ivory uppercase tracking-wider"
               >
-                <LogOut size={16} className="mr-1" />
-                Sign Out
-              </Button>
-            </div>
+                <LogOut size={16} />
+                <span>SIGN OUT</span>
+              </button>
+            </>
           ) : (
-            <Link to="/auth">
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-gold text-gold hover:bg-gold hover:text-navy"
-              >
-                <LogIn size={16} className="mr-1" />
-                Login
-              </Button>
+            <Link 
+              to="/auth" 
+              className="nav-item flex items-center gap-1 text-gold hover:text-ivory uppercase tracking-wider"
+            >
+              <LogIn size={16} />
+              <span>LOGIN</span>
             </Link>
           )}
         </div>
@@ -152,7 +147,7 @@ const Navigation = () => {
             onClick={() => setMenuOpen(false)}
           >
             <Home size={16} />
-            <span>Home</span>
+            <span>HOME</span>
           </Link>
           <Link 
             to="/about" 
@@ -160,7 +155,7 @@ const Navigation = () => {
             onClick={() => setMenuOpen(false)}
           >
             <User size={16} />
-            <span>About</span>
+            <span>ABOUT</span>
           </Link>
           <Link 
             to="/books" 
@@ -168,7 +163,7 @@ const Navigation = () => {
             onClick={() => setMenuOpen(false)}
           >
             <Book size={16} />
-            <span>Books</span>
+            <span>BOOKS</span>
           </Link>
           <Link 
             to="/gallery" 
@@ -176,7 +171,7 @@ const Navigation = () => {
             onClick={() => setMenuOpen(false)}
           >
             <Paintbrush size={16} />
-            <span>Gallery</span>
+            <span>GALLERY</span>
           </Link>
           
           {user ? (
@@ -188,7 +183,7 @@ const Navigation = () => {
                   onClick={() => setMenuOpen(false)}
                 >
                   <Shield size={16} />
-                  <span>Admin</span>
+                  <span>ADMIN</span>
                 </Link>
               )}
               <button
@@ -199,7 +194,7 @@ const Navigation = () => {
                 className="nav-item flex items-center gap-2 text-left"
               >
                 <LogOut size={16} />
-                <span>Sign Out</span>
+                <span>SIGN OUT</span>
               </button>
             </>
           ) : (
@@ -209,7 +204,7 @@ const Navigation = () => {
               onClick={() => setMenuOpen(false)}
             >
               <LogIn size={16} />
-              <span>Login</span>
+              <span>LOGIN</span>
             </Link>
           )}
         </div>
