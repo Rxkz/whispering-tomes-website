@@ -2,8 +2,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Book, User, Paintbrush, Home, LogIn, LogOut, Shield } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { Button } from './ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
 
 const Navigation = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -29,7 +29,7 @@ const Navigation = () => {
     setMenuOpen(!menuOpen);
   };
 
-  const isActive = (path) => {
+  const isActive = (path: string) => {
     return location.pathname === path;
   };
 
@@ -79,56 +79,61 @@ const Navigation = () => {
             className={`nav-item flex items-center gap-1 ${isActive('/') ? 'text-gold border-b border-gold' : ''}`}
           >
             <Home size={16} />
-            <span>HOME</span>
+            <span>Home</span>
           </Link>
           <Link 
             to="/about" 
             className={`nav-item flex items-center gap-1 ${isActive('/about') ? 'text-gold border-b border-gold' : ''}`}
           >
             <User size={16} />
-            <span>ABOUT</span>
+            <span>About</span>
           </Link>
           <Link 
             to="/books" 
             className={`nav-item flex items-center gap-1 ${isActive('/books') ? 'text-gold border-b border-gold' : ''}`}
           >
             <Book size={16} />
-            <span>BOOKS</span>
+            <span>Books</span>
           </Link>
           <Link 
             to="/gallery" 
             className={`nav-item flex items-center gap-1 ${isActive('/gallery') ? 'text-gold border-b border-gold' : ''}`}
           >
             <Paintbrush size={16} />
-            <span>GALLERY</span>
+            <span>Gallery</span>
           </Link>
           
           {user ? (
-            <>
+            <div className="flex items-center space-x-4">
               {isAdmin && (
                 <Link 
                   to="/admin" 
                   className={`nav-item flex items-center gap-1 ${isActive('/admin') ? 'text-gold border-b border-gold' : ''}`}
                 >
                   <Shield size={16} />
-                  <span>ADMIN</span>
+                  <span>Admin</span>
                 </Link>
               )}
-              <button
+              <Button
                 onClick={handleSignOut}
-                className="nav-item flex items-center gap-1 text-gold hover:text-ivory uppercase tracking-wider"
+                variant="outline"
+                size="sm"
+                className="border-gold text-gold hover:bg-gold hover:text-navy"
               >
-                <LogOut size={16} />
-                <span>SIGN OUT</span>
-              </button>
-            </>
+                <LogOut size={16} className="mr-1" />
+                Sign Out
+              </Button>
+            </div>
           ) : (
-            <Link 
-              to="/auth" 
-              className="nav-item flex items-center gap-1 text-gold hover:text-ivory uppercase tracking-wider"
-            >
-              <LogIn size={16} />
-              <span>LOGIN</span>
+            <Link to="/auth">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-gold text-gold hover:bg-gold hover:text-navy"
+              >
+                <LogIn size={16} className="mr-1" />
+                Login
+              </Button>
             </Link>
           )}
         </div>
@@ -147,7 +152,7 @@ const Navigation = () => {
             onClick={() => setMenuOpen(false)}
           >
             <Home size={16} />
-            <span>HOME</span>
+            <span>Home</span>
           </Link>
           <Link 
             to="/about" 
@@ -155,7 +160,7 @@ const Navigation = () => {
             onClick={() => setMenuOpen(false)}
           >
             <User size={16} />
-            <span>ABOUT</span>
+            <span>About</span>
           </Link>
           <Link 
             to="/books" 
@@ -163,7 +168,7 @@ const Navigation = () => {
             onClick={() => setMenuOpen(false)}
           >
             <Book size={16} />
-            <span>BOOKS</span>
+            <span>Books</span>
           </Link>
           <Link 
             to="/gallery" 
@@ -171,7 +176,7 @@ const Navigation = () => {
             onClick={() => setMenuOpen(false)}
           >
             <Paintbrush size={16} />
-            <span>GALLERY</span>
+            <span>Gallery</span>
           </Link>
           
           {user ? (
@@ -183,7 +188,7 @@ const Navigation = () => {
                   onClick={() => setMenuOpen(false)}
                 >
                   <Shield size={16} />
-                  <span>ADMIN</span>
+                  <span>Admin</span>
                 </Link>
               )}
               <button
@@ -194,7 +199,7 @@ const Navigation = () => {
                 className="nav-item flex items-center gap-2 text-left"
               >
                 <LogOut size={16} />
-                <span>SIGN OUT</span>
+                <span>Sign Out</span>
               </button>
             </>
           ) : (
@@ -204,7 +209,7 @@ const Navigation = () => {
               onClick={() => setMenuOpen(false)}
             >
               <LogIn size={16} />
-              <span>LOGIN</span>
+              <span>Login</span>
             </Link>
           )}
         </div>

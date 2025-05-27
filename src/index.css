@@ -94,24 +94,6 @@
   }
   
   .dust-particle {
-    @apply absolute rounded-full bg-gold/30 pointer-events-none;
-    animation: dust 10s infinite linear;
-  }
-}
-
-@keyframes dust {
-  0% {
-    opacity: 0;
-    transform: translateY(0) translateX(0);
-  }
-  10% {
-    opacity: 1;
-  }
-  90% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(var(--dust-y, -100px)) translateX(var(--dust-x, 50px));
+    @apply absolute rounded-full bg-gold/30 pointer-events-none animate-dust;
   }
 }

@@ -1,11 +1,19 @@
 
 import { useState } from 'react';
 
+interface ArtworkImage {
+  id: number;
+  title: string;
+  src: string;
+  description: string;
+  category: string;
+}
+
 const Gallery = () => {
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [activeCategory, setActiveCategory] = useState('all');
+  const [selectedImage, setSelectedImage] = useState<ArtworkImage | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string>('all');
   
-  const artworks = [
+  const artworks: ArtworkImage[] = [
     {
       id: 1, 
       title: "The Ancient Library",
