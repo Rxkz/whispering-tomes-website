@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Book, User, Paintbrush, Home, LogIn, LogOut, Shield } from 'lucide-react';
@@ -10,9 +9,6 @@ const Navigation = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
   const { user, isAdmin, signOut } = useAuth();
-  
-  console.log('Navigation render - user:', user?.email);
-  console.log('Navigation render - isAdmin:', isAdmin);
   
   useEffect(() => {
     const handleScroll = () => {
@@ -38,7 +34,6 @@ const Navigation = () => {
 
   const handleSignOut = async () => {
     try {
-      console.log('Signing out...');
       await signOut();
     } catch (error) {
       console.error('Error signing out:', error);

@@ -38,7 +38,7 @@ const Auth = () => {
           title: "Welcome back!",
           description: "You have been signed in successfully.",
         });
-        // Let the AuthContext handle the redirect
+        navigate('/');
       }
     } catch (error) {
       toast({
@@ -118,7 +118,7 @@ const Auth = () => {
               disabled={loading}
               size="lg"
             >
-              {loading ? (isSignUp ? 'Creating Account...' : 'Logging in...') : (isSignUp ? 'Create Account' : 'Sign In')}
+              {loading ? 'Processing...' : (isSignUp ? 'Create Account' : 'Sign In')}
             </Button>
           </form>
           <div className="mt-6 text-center">
