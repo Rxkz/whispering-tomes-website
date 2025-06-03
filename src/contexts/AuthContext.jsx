@@ -35,7 +35,13 @@ export const AuthProvider = ({ children }) => {
                 .eq('user_id', session.user.id)
                 .eq('role', 'admin')
                 .single();
-              setIsAdmin(!!data);
+              const userIsAdmin = !!data;
+              setIsAdmin(userIsAdmin);
+              
+              // Redirect admin to dashboard after login
+              if (userIsAdmin && event === 'SIGNED_IN') {
+                window.location.href = '/admin';
+              }
             } catch (error) {
               setIsAdmin(false);
             }
