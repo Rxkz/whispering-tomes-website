@@ -9,14 +9,6 @@ import { Textarea } from '../components/ui/textarea';
 import { Users, BookOpen, ShoppingCart, Settings, Plus, Edit, Trash2 } from 'lucide-react';
 import { useToast } from '../hooks/use-toast';
 import { supabase } from '../integrations/supabase/client';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '../components/ui/table';
 
 const AdminDashboard = () => {
   const { user, isAdmin, isLoading } = useAuth();
@@ -56,10 +48,12 @@ const AdminDashboard = () => {
   }
 
   useEffect(() => {
-    fetchStats();
-    fetchBooks();
-    fetchOrders();
-  }, []);
+    if (user && isAdmin) {
+      fetchStats();
+      fetchBooks();
+      fetchOrders();
+    }
+  }, [user, isAdmin]);
 
   const fetchStats = async () => {
     try {
