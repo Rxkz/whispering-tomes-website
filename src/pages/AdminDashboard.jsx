@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
@@ -7,10 +6,9 @@ import { Button } from '../components/ui/button';
 import { Users, BookOpen, ShoppingCart, Settings } from 'lucide-react';
 
 const AdminDashboard = () => {
-  const { user, isAdmin, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
 
   console.log('AdminDashboard - user:', user);
-  console.log('AdminDashboard - isAdmin:', isAdmin);
   console.log('AdminDashboard - isLoading:', isLoading);
 
   if (isLoading) {
@@ -23,11 +21,6 @@ const AdminDashboard = () => {
 
   if (!user) {
     console.log('No user found, redirecting to auth');
-    return <Navigate to="/auth" replace />;
-  }
-
-  if (!isAdmin) {
-    console.log('User is not admin, redirecting to auth');
     return <Navigate to="/auth" replace />;
   }
 
