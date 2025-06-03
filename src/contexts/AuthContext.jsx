@@ -120,7 +120,6 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log('SignOut function called');
       
-      // Sign out from Supabase first
       const { error } = await supabase.auth.signOut();
       
       if (error) {
@@ -128,16 +127,10 @@ export const AuthProvider = ({ children }) => {
         throw error;
       }
       
-      console.log('Successfully signed out');
+      console.log('Successfully signed out from Supabase');
       
-      // Clear local state
-      setUser(null);
-      setSession(null);
-      setIsAdmin(false);
-      setIsLoading(false);
-      
-      // Redirect to home page
-      window.location.href = '/';
+      // The onAuthStateChange listener will handle clearing the state
+      // No need to manually clear state or redirect here
       
     } catch (error) {
       console.error('Sign out error:', error);
