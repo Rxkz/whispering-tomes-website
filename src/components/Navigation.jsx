@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Book, User, Paintbrush, Home, LogIn, LogOut, Shield } from 'lucide-react';
@@ -35,11 +34,7 @@ const Navigation = () => {
 
   const handleSignOut = async () => {
     try {
-      console.log('Signing out...');
       await signOut();
-      console.log('Sign out successful');
-      // Close mobile menu if open
-      setMenuOpen(false);
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -118,26 +113,21 @@ const Navigation = () => {
                   <span>ADMIN</span>
                 </Link>
               )}
-              <Button
+              <button
                 onClick={handleSignOut}
-                variant="outline"
-                size="sm"
-                className="border-gold text-gold hover:bg-gold hover:text-navy"
+                className="nav-item flex items-center gap-1 text-gold hover:text-ivory uppercase tracking-wider"
               >
-                <LogOut size={16} className="mr-1" />
-                SIGN OUT
-              </Button>
+                <LogOut size={16} />
+                <span>SIGN OUT</span>
+              </button>
             </>
           ) : (
-            <Link to="/auth">
-              <Button
-                variant="outline"
-                size="sm"
-                className="border-gold text-gold hover:bg-gold hover:text-navy"
-              >
-                <LogIn size={16} className="mr-1" />
-                LOGIN
-              </Button>
+            <Link 
+              to="/auth" 
+              className="nav-item flex items-center gap-1 text-gold hover:text-ivory uppercase tracking-wider"
+            >
+              <LogIn size={16} />
+              <span>LOGIN</span>
             </Link>
           )}
         </div>
@@ -196,7 +186,10 @@ const Navigation = () => {
                 </Link>
               )}
               <button
-                onClick={handleSignOut}
+                onClick={() => {
+                  handleSignOut();
+                  setMenuOpen(false);
+                }}
                 className="nav-item flex items-center gap-2 text-left"
               >
                 <LogOut size={16} />

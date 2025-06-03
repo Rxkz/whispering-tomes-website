@@ -110,27 +110,8 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signOut = async () => {
-    console.log('SignOut function called');
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('Supabase signOut error:', error);
-        throw error;
-      }
-      console.log('Supabase signOut successful');
-      
-      // Clear local state immediately
-      setUser(null);
-      setSession(null);
-      setIsAdmin(false);
-      setIsLoading(false);
-      
-      // Redirect to home page after successful sign out
-      window.location.href = '/';
-    } catch (error) {
-      console.error('Error in signOut function:', error);
-      throw error;
-    }
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
   };
 
   const value = {
