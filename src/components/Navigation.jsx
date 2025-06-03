@@ -8,13 +8,11 @@ import { Button } from './ui/button';
 const Navigation = () => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isSigningOut, setIsSigningOut] = useState(false);
   const location = useLocation();
   const { user, isAdmin, signOut } = useAuth();
   
   console.log('Navigation render - user:', user?.email);
   console.log('Navigation render - isAdmin:', isAdmin);
-  console.log('Navigation render - isSigningOut:', isSigningOut);
   
   useEffect(() => {
     const handleScroll = () => {
@@ -39,15 +37,11 @@ const Navigation = () => {
   };
 
   const handleSignOut = async () => {
-    if (isSigningOut) return; // Prevent multiple clicks
-    
     try {
-      setIsSigningOut(true);
       console.log('Signing out...');
       await signOut();
     } catch (error) {
       console.error('Error signing out:', error);
-      setIsSigningOut(false); // Reset on error
     }
   };
 
@@ -126,13 +120,10 @@ const Navigation = () => {
               )}
               <button
                 onClick={handleSignOut}
-                disabled={isSigningOut}
-                className={`nav-item flex items-center gap-1 text-gold hover:text-ivory uppercase tracking-wider ${
-                  isSigningOut ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
+                className="nav-item flex items-center gap-1 text-gold hover:text-ivory uppercase tracking-wider"
               >
                 <LogOut size={16} />
-                <span>{isSigningOut ? 'SIGNING OUT...' : 'SIGN OUT'}</span>
+                <span>SIGN OUT</span>
               </button>
             </>
           ) : (
@@ -204,13 +195,10 @@ const Navigation = () => {
                   handleSignOut();
                   setMenuOpen(false);
                 }}
-                disabled={isSigningOut}
-                className={`nav-item flex items-center gap-2 text-left ${
-                  isSigningOut ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
+                className="nav-item flex items-center gap-2 text-left"
               >
                 <LogOut size={16} />
-                <span>{isSigningOut ? 'SIGNING OUT...' : 'SIGN OUT'}</span>
+                <span>SIGN OUT</span>
               </button>
             </>
           ) : (

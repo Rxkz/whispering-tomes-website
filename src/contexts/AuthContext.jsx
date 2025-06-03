@@ -54,14 +54,6 @@ export const AuthProvider = ({ children }) => {
         
         if (session?.user) {
           await checkAdminStatus(session.user.id);
-          
-          // Redirect admin to dashboard after login
-          if (event === 'SIGNED_IN') {
-            // Small delay to ensure admin status is checked
-            setTimeout(() => {
-              console.log('Checking if should redirect to admin...');
-            }, 100);
-          }
         } else {
           setIsAdmin(false);
           setIsLoading(false);
@@ -90,7 +82,7 @@ export const AuthProvider = ({ children }) => {
       setIsAdmin(userIsAdmin);
       
       // Redirect to admin dashboard if user is admin and just signed in
-      if (userIsAdmin && window.location.pathname === '/auth') {
+      if (userIsAdmin && (window.location.pathname === '/auth' || window.location.pathname === '/')) {
         console.log('Redirecting admin to dashboard');
         window.location.href = '/admin';
       }
@@ -128,13 +120,7 @@ export const AuthProvider = ({ children }) => {
     try {
       console.log('SignOut function called');
       
-      // Clear local state immediately
-      setUser(null);
-      setSession(null);
-      setIsAdmin(false);
-      setIsLoading(false);
-      
-      // Sign out from Supabase
+      // Sign out from Supabase first
       const { error } = await supabase.auth.signOut();
       
       if (error) {
@@ -143,6 +129,12 @@ export const AuthProvider = ({ children }) => {
       }
       
       console.log('Successfully signed out');
+      
+      // Clear local state
+      setUser(null);
+      setSession(null);
+      setIsAdmin(false);
+      setIsLoading(false);
       
       // Redirect to home page
       window.location.href = '/';
