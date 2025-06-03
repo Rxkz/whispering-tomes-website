@@ -11,6 +11,7 @@ const AdminDashboard = () => {
   console.log('AdminDashboard - user:', user);
   console.log('AdminDashboard - isLoading:', isLoading);
 
+  // Temporarily remove all authentication checks to allow access to everyone
   if (isLoading) {
     return (
       <div className="min-h-screen bg-navy flex items-center justify-center">
@@ -19,10 +20,11 @@ const AdminDashboard = () => {
     );
   }
 
-  if (!user) {
-    console.log('No user found, redirecting to auth');
-    return <Navigate to="/auth" replace />;
-  }
+  // Comment out the user check for now to allow everyone access
+  // if (!user) {
+  //   console.log('No user found, redirecting to auth');
+  //   return <Navigate to="/auth" replace />;
+  // }
 
   return (
     <div className="min-h-screen bg-navy pt-20 pb-10">
@@ -30,7 +32,8 @@ const AdminDashboard = () => {
         <div className="mb-8">
           <h1 className="text-4xl font-cormorant text-gold mb-2">Admin Dashboard</h1>
           <p className="text-ivory">Manage your E-Library system</p>
-          <p className="text-ivory/70 text-sm mt-2">Welcome, {user.email}</p>
+          {user && <p className="text-ivory/70 text-sm mt-2">Welcome, {user.email}</p>}
+          {!user && <p className="text-ivory/70 text-sm mt-2">Demo Mode - No Authentication Required</p>}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
