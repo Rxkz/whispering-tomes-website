@@ -19,57 +19,45 @@ export const AuthProvider = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    console.log('AuthProvider: Setting up auth state listener');
-    
-    // Set up auth state listener first
+    // Check for existing session first
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session check:', session);
+      setSession(session);
+      setUser(session?.user ?? null);
+      
+      if (session?.user) {
+        checkAdminStatus(session.user.id);
+      } else {
+        setIsLoading(false);
+      }
+    });
+
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state change:', event, session?.user?.email || 'no user');
+        console.log('Auth state change:', event, session);
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          console.log('User found, checking admin status');
           await checkAdminStatus(session.user.id);
+          
+          // Redirect admin to dashboard after login
+          if (event === 'SIGNED_IN') {
+            // Small delay to ensure admin status is checked
+            setTimeout(() => {
+              console.log('Checking if should redirect to admin...');
+              // We'll check admin status in the next render cycle
+            }, 100);
+          }
         } else {
-          console.log('No user, clearing admin status');
           setIsAdmin(false);
           setIsLoading(false);
         }
       }
     );
 
-    // Check for existing session
-    const checkInitialSession = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) {
-          console.error('Error getting session:', error);
-          setIsLoading(false);
-          return;
-        }
-        
-        console.log('Initial session check:', session?.user?.email || 'no session');
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (session?.user) {
-          await checkAdminStatus(session.user.id);
-        } else {
-          setIsLoading(false);
-        }
-      } catch (error) {
-        console.error('Error in initial session check:', error);
-        setIsLoading(false);
-      }
-    };
-
-    checkInitialSession();
-
-    return () => {
-      console.log('Cleaning up auth subscription');
-      subscription.unsubscribe();
-    };
+    return () => subscription.unsubscribe();
   }, []);
 
   const checkAdminStatus = async (userId) => {
@@ -82,16 +70,17 @@ export const AuthProvider = ({ children }) => {
         .eq('role', 'admin')
         .single();
       
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error checking admin status:', error);
-        setIsAdmin(false);
-      } else {
-        const userIsAdmin = !!data;
-        console.log('Admin status result:', userIsAdmin);
-        setIsAdmin(userIsAdmin);
+      console.log('Admin check result:', data, error);
+      const userIsAdmin = !!data;
+      setIsAdmin(userIsAdmin);
+      
+      // Redirect to admin dashboard if user is admin and just signed in
+      if (userIsAdmin && window.location.pathname === '/auth') {
+        console.log('Redirecting admin to dashboard');
+        window.location.href = '/admin';
       }
     } catch (error) {
-      console.error('Error in checkAdminStatus:', error);
+      console.error('Error checking admin status:', error);
       setIsAdmin(false);
     } finally {
       setIsLoading(false);
@@ -122,27 +111,24 @@ export const AuthProvider = ({ children }) => {
 
   const signOut = async () => {
     console.log('SignOut function called');
-    setIsLoading(true);
-    
     try {
-      // Clear local state first
-      setUser(null);
-      setSession(null);
-      setIsAdmin(false);
-      
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('Supabase signOut error:', error);
         throw error;
       }
-      
       console.log('Supabase signOut successful');
       
-      // Force redirect to home page
-      window.location.replace('/');
+      // Clear local state immediately
+      setUser(null);
+      setSession(null);
+      setIsAdmin(false);
+      setIsLoading(false);
+      
+      // Redirect to home page after successful sign out
+      window.location.href = '/';
     } catch (error) {
       console.error('Error in signOut function:', error);
-      setIsLoading(false);
       throw error;
     }
   };

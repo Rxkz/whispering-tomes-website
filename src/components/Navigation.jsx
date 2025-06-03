@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Book, User, Paintbrush, Home, LogIn, LogOut, Shield } from 'lucide-react';
@@ -7,9 +8,8 @@ import { Button } from './ui/button';
 const Navigation = () => {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
-  const [signingOut, setSigningOut] = useState(false);
   const location = useLocation();
-  const { user, isAdmin, signOut, isLoading } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -34,17 +34,14 @@ const Navigation = () => {
   };
 
   const handleSignOut = async () => {
-    if (signingOut) return; // Prevent multiple sign out attempts
-    
     try {
-      console.log('Navigation: Starting sign out process');
-      setSigningOut(true);
-      setMenuOpen(false);
-      
+      console.log('Signing out...');
       await signOut();
+      console.log('Sign out successful');
+      // Close mobile menu if open
+      setMenuOpen(false);
     } catch (error) {
-      console.error('Navigation: Error signing out:', error);
-      setSigningOut(false);
+      console.error('Error signing out:', error);
     }
   };
 
@@ -110,7 +107,7 @@ const Navigation = () => {
             <span>GALLERY</span>
           </Link>
           
-          {!isLoading && user ? (
+          {user ? (
             <>
               {isAdmin && (
                 <Link 
@@ -125,14 +122,13 @@ const Navigation = () => {
                 onClick={handleSignOut}
                 variant="outline"
                 size="sm"
-                disabled={signingOut}
-                className="border-gold text-gold hover:bg-gold hover:text-navy disabled:opacity-50"
+                className="border-gold text-gold hover:bg-gold hover:text-navy"
               >
                 <LogOut size={16} className="mr-1" />
-                {signingOut ? 'SIGNING OUT...' : 'SIGN OUT'}
+                SIGN OUT
               </Button>
             </>
-          ) : !isLoading ? (
+          ) : (
             <Link to="/auth">
               <Button
                 variant="outline"
@@ -143,7 +139,7 @@ const Navigation = () => {
                 LOGIN
               </Button>
             </Link>
-          ) : null}
+          )}
         </div>
       </div>
       
@@ -187,7 +183,7 @@ const Navigation = () => {
             <span>GALLERY</span>
           </Link>
           
-          {!isLoading && user ? (
+          {user ? (
             <>
               {isAdmin && (
                 <Link 
@@ -201,14 +197,13 @@ const Navigation = () => {
               )}
               <button
                 onClick={handleSignOut}
-                disabled={signingOut}
-                className="nav-item flex items-center gap-2 text-left disabled:opacity-50"
+                className="nav-item flex items-center gap-2 text-left"
               >
                 <LogOut size={16} />
-                <span>{signingOut ? 'SIGNING OUT...' : 'SIGN OUT'}</span>
+                <span>SIGN OUT</span>
               </button>
             </>
-          ) : !isLoading ? (
+          ) : (
             <Link 
               to="/auth" 
               className="nav-item flex items-center gap-2"
@@ -217,7 +212,7 @@ const Navigation = () => {
               <LogIn size={16} />
               <span>LOGIN</span>
             </Link>
-          ) : null}
+          )}
         </div>
       </div>
     </nav>
