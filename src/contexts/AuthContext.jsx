@@ -19,8 +19,12 @@ export const AuthProvider = ({ children }) => {
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
+
     // Check for existing session first
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+      
       console.log('Initial session check:', session);
       setSession(session);
       setUser(session?.user ?? null);
@@ -35,9 +39,18 @@ export const AuthProvider = ({ children }) => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return;
+        
         console.log('Auth state change:', event, session);
         setSession(session);
         setUser(session?.user ?? null);
+        
+        if (event === 'SIGNED_OUT') {
+          console.log('User signed out, clearing state');
+          setIsAdmin(false);
+          setIsLoading(false);
+          return;
+        }
         
         if (session?.user) {
           await checkAdminStatus(session.user.id);
@@ -47,7 +60,6 @@ export const AuthProvider = ({ children }) => {
             // Small delay to ensure admin status is checked
             setTimeout(() => {
               console.log('Checking if should redirect to admin...');
-              // We'll check admin status in the next render cycle
             }, 100);
           }
         } else {
@@ -57,7 +69,10 @@ export const AuthProvider = ({ children }) => {
       }
     );
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const checkAdminStatus = async (userId) => {
@@ -110,8 +125,32 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) throw error;
+    try {
+      console.log('SignOut function called');
+      
+      // Clear local state immediately
+      setUser(null);
+      setSession(null);
+      setIsAdmin(false);
+      setIsLoading(false);
+      
+      // Sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Error during sign out:', error);
+        throw error;
+      }
+      
+      console.log('Successfully signed out');
+      
+      // Redirect to home page
+      window.location.href = '/';
+      
+    } catch (error) {
+      console.error('Sign out error:', error);
+      throw error;
+    }
   };
 
   const value = {
