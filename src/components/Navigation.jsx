@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Book, User, Paintbrush, Home, LogIn, LogOut, Shield } from 'lucide-react';
@@ -10,6 +11,10 @@ const Navigation = () => {
   const [signingOut, setSigningOut] = useState(false);
   const location = useLocation();
   const { user, isAdmin, signOut, isLoading } = useAuth();
+  
+  console.log('Navigation render - user:', user?.email || 'no user');
+  console.log('Navigation render - isAdmin:', isAdmin);
+  console.log('Navigation render - isLoading:', isLoading);
   
   useEffect(() => {
     const handleScroll = () => {
@@ -34,7 +39,7 @@ const Navigation = () => {
   };
 
   const handleSignOut = async () => {
-    if (signingOut) return; // Prevent multiple sign out attempts
+    if (signingOut) return;
     
     try {
       console.log('Navigation: Starting sign out process');
@@ -110,7 +115,10 @@ const Navigation = () => {
             <span>GALLERY</span>
           </Link>
           
-          {!isLoading && user ? (
+          {/* Auth section - show different content based on auth state */}
+          {isLoading ? (
+            <div className="text-ivory text-sm">Loading...</div>
+          ) : user ? (
             <>
               {isAdmin && (
                 <Link 
@@ -132,7 +140,7 @@ const Navigation = () => {
                 {signingOut ? 'SIGNING OUT...' : 'SIGN OUT'}
               </Button>
             </>
-          ) : !isLoading ? (
+          ) : (
             <Link to="/auth">
               <Button
                 variant="outline"
@@ -143,7 +151,7 @@ const Navigation = () => {
                 LOGIN
               </Button>
             </Link>
-          ) : null}
+          )}
         </div>
       </div>
       
@@ -187,7 +195,10 @@ const Navigation = () => {
             <span>GALLERY</span>
           </Link>
           
-          {!isLoading && user ? (
+          {/* Mobile auth section */}
+          {isLoading ? (
+            <div className="text-ivory text-sm">Loading...</div>
+          ) : user ? (
             <>
               {isAdmin && (
                 <Link 
@@ -208,7 +219,7 @@ const Navigation = () => {
                 <span>{signingOut ? 'SIGNING OUT...' : 'SIGN OUT'}</span>
               </button>
             </>
-          ) : !isLoading ? (
+          ) : (
             <Link 
               to="/auth" 
               className="nav-item flex items-center gap-2"
@@ -217,7 +228,7 @@ const Navigation = () => {
               <LogIn size={16} />
               <span>LOGIN</span>
             </Link>
-          ) : null}
+          )}
         </div>
       </div>
     </nav>
