@@ -16,12 +16,11 @@ const NewsletterForm = () => {
     console.log('Newsletter subscription attempt for:', email);
 
     try {
-      console.log('Calling send-newsletter-email function...');
+      console.log('Calling newsletter-subscribe function...');
       
       // Use the correct function name that exists in your codebase
-      const { data, error } = await supabase.functions.invoke('send-newsletter-email', {
+      const { data, error } = await supabase.functions.invoke('newsletter-subscribe', {
         body: { 
-          type: 'welcome',
           email: email 
         },
       });
