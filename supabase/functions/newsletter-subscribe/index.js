@@ -6,6 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Max-Age': '86400',
 };
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL');
@@ -25,6 +26,8 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 const handler = async (req) => {
   console.log('Newsletter subscribe function called with method:', req.method);
   console.log('Request headers:', Object.fromEntries(req.headers.entries()));
+  console.log('Request URL:', req.url);
+  console.log('Request origin:', req.headers.get('origin'));
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -33,6 +36,18 @@ const handler = async (req) => {
       status: 200,
       headers: corsHeaders 
     });
+  }
+
+  // Only allow POST requests for the actual subscription
+  if (req.method !== 'POST') {
+    console.log('Method not allowed:', req.method);
+    return new Response(
+      JSON.stringify({ error: 'Method not allowed' }),
+      {
+        status: 405,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      }
+    );
   }
 
   try {

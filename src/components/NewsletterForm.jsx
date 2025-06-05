@@ -14,6 +14,8 @@ const NewsletterForm = () => {
     setMessage('');
 
     console.log('Newsletter subscription attempt for:', email);
+    console.log('Current URL:', window.location.href);
+    console.log('Supabase client URL:', supabase.supabaseUrl);
 
     try {
       console.log('Calling newsletter-subscribe function...');
@@ -58,6 +60,8 @@ const NewsletterForm = () => {
         setMessage('Unable to connect to our subscription service. Please try again in a moment.');
       } else if (error.message && error.message.includes('network')) {
         setMessage('Network error. Please check your connection and try again.');
+      } else if (error.message && error.message.includes('CORS')) {
+        setMessage('Connection issue detected. Please try again.');
       } else {
         setMessage('Something went wrong. Please try again later.');
       }
