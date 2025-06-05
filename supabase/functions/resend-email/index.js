@@ -13,10 +13,9 @@ const corsHeaders = {
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 const handler = async (req) => {
-  console.log('Send newsletter email function called');
+  console.log('Resend email function called');
   console.log('Method:', req.method);
   console.log('Origin:', req.headers.get('origin'));
-  console.log('URL:', req.url);
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -39,29 +38,15 @@ const handler = async (req) => {
   }
 
   try {
-    const { type, email } = await req.json();
-    console.log(`Sending ${type} email to: ${email}`);
+    const { to, subject, html } = await req.json();
+    console.log(`Sending email to: ${to}`);
 
-    let emailData;
-
-    if (type === 'welcome') {
-      emailData = {
-        from: "Newsletter <onboarding@resend.dev>",
-        to: [email],
-        subject: "Welcome to our Newsletter!",
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h1 style="color: #333;">Welcome to our Newsletter!</h1>
-            <p>Thank you for subscribing to our newsletter. We're excited to have you on board!</p>
-            <p>You'll receive updates about our latest content, news, and exclusive offers.</p>
-            <p>If you have any questions, feel free to reach out to us.</p>
-            <p>Best regards,<br>The Team</p>
-          </div>
-        `,
-      };
-    } else {
-      throw new Error(`Unknown email type: ${type}`);
-    }
+    const emailData = {
+      from: "Newsletter <onboarding@resend.dev>",
+      to: [to],
+      subject: subject,
+      html: html,
+    };
 
     console.log('Sending email with Resend...');
     const emailResponse = await resend.emails.send(emailData);
@@ -71,7 +56,7 @@ const handler = async (req) => {
       JSON.stringify({ 
         success: true, 
         message: 'Email sent successfully',
-        id: emailResponse.data?.id 
+        data: emailResponse.data 
       }),
       {
         status: 200,
