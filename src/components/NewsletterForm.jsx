@@ -13,24 +13,50 @@ const NewsletterForm = () => {
     setIsLoading(true);
     setMessage('');
 
+    console.log('Newsletter subscription attempt for:', email);
+
     try {
+      console.log('Calling newsletter-subscribe function...');
       const { data, error } = await supabase.functions.invoke('newsletter-subscribe', {
         body: { email }
       });
 
-      if (error) throw error;
+      console.log('Function response:', { data, error });
 
-      if (data.error) {
+      if (error) {
+        console.error('Function invocation error:', error);
+        throw error;
+      }
+
+      if (data && data.error) {
+        console.error('Function returned error:', data.error);
         setMessage(data.error);
         setIsSuccess(false);
-      } else {
+      } else if (data && data.success) {
+        console.log('Success:', data.message);
         setMessage(data.message);
         setIsSuccess(true);
         setEmail('');
+      } else {
+        console.error('Unexpected response format:', data);
+        setMessage('Unexpected response from server');
+        setIsSuccess(false);
       }
     } catch (error) {
       console.error('Newsletter subscription error:', error);
-      setMessage('Failed to subscribe. Please try again.');
+      console.error('Error details:', {
+        message: error.message,
+        status: error.status,
+        details: error.details
+      });
+      
+      if (error.message && error.message.includes('Not found')) {
+        setMessage('Newsletter service is not available. Please try again later.');
+      } else if (error.message && error.message.includes('network')) {
+        setMessage('Network error. Please check your connection and try again.');
+      } else {
+        setMessage(`Failed to subscribe: ${error.message || 'Unknown error'}`);
+      }
       setIsSuccess(false);
     } finally {
       setIsLoading(false);
