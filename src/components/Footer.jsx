@@ -1,6 +1,4 @@
-
 import { Mail, Facebook, Instagram, Twitter } from 'lucide-react';
-import NewsletterForm from './NewsletterForm';
 
 const Footer = () => {
   return (
@@ -49,7 +47,20 @@ const Footer = () => {
           <div className="space-y-4">
             <h3 className="text-gold font-cormorant text-2xl font-semibold tracking-wider">NEWSLETTER</h3>
             <p className="text-antique/70">Subscribe to receive updates about new releases and events.</p>
-            <NewsletterForm />
+            <form className="flex flex-col sm:flex-row gap-2">
+              <input 
+                type="email" 
+                placeholder="Your email" 
+                className="bg-navy/50 border border-gold/30 rounded px-4 py-2 text-ivory focus:outline-none focus:border-gold"
+                aria-label="Email for newsletter"
+              />
+              <button 
+                type="submit" 
+                className="gold-btn"
+              >
+                Subscribe
+              </button>
+            </form>
           </div>
         </div>
         

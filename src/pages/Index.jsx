@@ -1,6 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import NewsletterForm from '../components/NewsletterForm';
 
 const Index = () => {
   const [bookHovered, setBookHovered] = useState(false);
@@ -228,7 +227,20 @@ const Index = () => {
             <p className="text-ivory/80 mb-8 max-w-xl mx-auto">
               Subscribe to receive exclusive content, early access to new releases, and invitations to special events.
             </p>
-            <NewsletterForm />
+            <form className="flex flex-col sm:flex-row gap-4 justify-center">
+              <input 
+                type="email" 
+                placeholder="Your email address" 
+                className="bg-navy/50 border border-gold/30 rounded px-4 py-3 text-ivory focus:outline-none focus:border-gold flex-grow max-w-md"
+                aria-label="Email for newsletter"
+              />
+              <button 
+                type="submit" 
+                className="gold-btn"
+              >
+                Subscribe
+              </button>
+            </form>
           </div>
         </div>
       </section>
