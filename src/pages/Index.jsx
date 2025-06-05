@@ -245,7 +245,7 @@ const Index = () => {
                 emailjs.send(
                   SERVICE_ID,
                   TEMPLATE_ID,
-                  { user_email: email },
+                  { email: email, name: "Subscriber" },
                   USER_ID
                 )
                 .then((result) => {
