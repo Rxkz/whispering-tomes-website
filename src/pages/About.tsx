@@ -1,13 +1,47 @@
 import { useEffect, useState } from 'react';
+import emailjs from 'emailjs-com';
 
 const About = () => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
-  
+  // Contact form states
+  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState('');
+
   useEffect(() => {
     const image = new Image();
     image.src = '/Goat.jpg';
     image.onload = () => setIsImageLoaded(true);
   }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setResult('');
+    emailjs.send(
+      'service_wjz3oia',
+      'template_hd1ldze',
+      {
+        from_name: form.name,
+        from_email: form.email,
+        subject: form.subject,
+        message: form.message,
+        current_date: new Date().toLocaleString()
+      },
+      '_y4S2_F3kCEksm3lh'
+    )
+    .then(() => {
+      setResult('Message sent! Thank you for reaching out.');
+      setForm({ name: '', email: '', subject: '', message: '' });
+    }, () => {
+      setResult('Failed to send. Please try again.');
+    })
+    .finally(() => setLoading(false));
+  };
 
   return (
     <div className="min-h-screen pt-24 pb-16 px-4">
@@ -130,12 +164,16 @@ const About = () => {
           </h2>
           
           <div className="book-page p-8">
-            <form className="space-y-6">
+            <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
                 <label htmlFor="name" className="block text-gold font-cormorant mb-2">Name</label>
                 <input 
                   type="text" 
                   id="name" 
+                  name="name"
+                  value={form.name}
+                  onChange={handleChange}
+                  required
                   className="w-full bg-navy/50 border border-gold/30 rounded px-4 py-2 text-ivory focus:outline-none focus:border-gold"
                 />
               </div>
@@ -145,6 +183,10 @@ const About = () => {
                 <input 
                   type="email" 
                   id="email" 
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  required
                   className="w-full bg-navy/50 border border-gold/30 rounded px-4 py-2 text-ivory focus:outline-none focus:border-gold"
                 />
               </div>
@@ -154,6 +196,10 @@ const About = () => {
                 <input 
                   type="text" 
                   id="subject" 
+                  name="subject"
+                  value={form.subject}
+                  onChange={handleChange}
+                  required
                   className="w-full bg-navy/50 border border-gold/30 rounded px-4 py-2 text-ivory focus:outline-none focus:border-gold"
                 />
               </div>
@@ -162,16 +208,23 @@ const About = () => {
                 <label htmlFor="message" className="block text-gold font-cormorant mb-2">Message</label>
                 <textarea 
                   id="message" 
+                  name="message"
                   rows={5}
+                  value={form.message}
+                  onChange={handleChange}
+                  required
                   className="w-full bg-navy/50 border border-gold/30 rounded px-4 py-2 text-ivory focus:outline-none focus:border-gold"
                 ></textarea>
               </div>
               
               <div>
-                <button type="submit" className="gold-btn w-full">
-                  Send Message
+                <button type="submit" className="gold-btn w-full" disabled={loading}>
+                  {loading ? 'Sending...' : 'Send Message'}
                 </button>
               </div>
+              {result && (
+                <div className="text-center text-gold font-cormorant mt-4">{result}</div>
+              )}
             </form>
           </div>
         </div>
