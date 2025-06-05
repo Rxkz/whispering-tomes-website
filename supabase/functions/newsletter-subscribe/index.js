@@ -10,6 +10,11 @@ const corsHeaders = {
 const supabaseUrl = Deno.env.get('SUPABASE_URL');
 const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
+console.log('Environment check:', {
+  supabaseUrl: supabaseUrl ? 'Present' : 'Missing',
+  supabaseKey: supabaseKey ? 'Present' : 'Missing'
+});
+
 if (!supabaseUrl || !supabaseKey) {
   console.error('Missing required environment variables');
 }
@@ -17,7 +22,7 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const handler = async (req) => {
-  console.log('Newsletter subscribe function called');
+  console.log('Newsletter subscribe function called with method:', req.method);
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -139,7 +144,8 @@ const handler = async (req) => {
       message: error.message,
       code: error.code,
       details: error.details,
-      hint: error.hint
+      hint: error.hint,
+      stack: error.stack
     });
     
     return new Response(

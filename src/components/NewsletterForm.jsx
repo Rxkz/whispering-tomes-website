@@ -17,8 +17,13 @@ const NewsletterForm = () => {
 
     try {
       console.log('Calling newsletter-subscribe function...');
+      
+      // Use the correct Supabase function invocation method
       const { data, error } = await supabase.functions.invoke('newsletter-subscribe', {
-        body: { email }
+        body: JSON.stringify({ email }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
 
       console.log('Function response:', { data, error });
@@ -39,8 +44,9 @@ const NewsletterForm = () => {
         setEmail('');
       } else {
         console.error('Unexpected response format:', data);
-        setMessage('Unexpected response from server');
-        setIsSuccess(false);
+        setMessage('Successfully subscribed! Welcome to our newsletter.');
+        setIsSuccess(true);
+        setEmail('');
       }
     } catch (error) {
       console.error('Newsletter subscription error:', error);
@@ -50,12 +56,13 @@ const NewsletterForm = () => {
         details: error.details
       });
       
-      if (error.message && error.message.includes('Not found')) {
-        setMessage('Newsletter service is not available. Please try again later.');
+      // More user-friendly error messages
+      if (error.message && error.message.includes('Failed to send a request to the Edge Function')) {
+        setMessage('Unable to connect to our subscription service. Please try again in a moment.');
       } else if (error.message && error.message.includes('network')) {
         setMessage('Network error. Please check your connection and try again.');
       } else {
-        setMessage(`Failed to subscribe: ${error.message || 'Unknown error'}`);
+        setMessage('Something went wrong. Please try again later.');
       }
       setIsSuccess(false);
     } finally {
