@@ -14,29 +14,23 @@ const NewsletterForm = () => {
     setMessage('');
 
     console.log('Newsletter subscription attempt for:', email);
-    console.log('Current URL:', window.location.href);
-    console.log('Supabase client URL:', supabase.supabaseUrl);
 
     try {
-      console.log('Calling newsletter-subscribe function...');
+      console.log('Calling send-newsletter-email function...');
       
-      // Use the correct Supabase function invocation method with proper body format
-      const { data, error } = await supabase.functions.invoke('newsletter-subscribe', {
-        body: { email },
+      // Use the correct function name that exists in your codebase
+      const { data, error } = await supabase.functions.invoke('send-newsletter-email', {
+        body: { 
+          type: 'welcome',
+          email: email 
+        },
       });
 
       console.log('Function response:', { data, error });
 
       if (error) {
         console.error('Function invocation error:', error);
-        // Handle specific error types
-        if (error.message && error.message.includes('FunctionsHttpError')) {
-          setMessage('Service temporarily unavailable. Please try again in a moment.');
-        } else if (error.message && error.message.includes('CORS')) {
-          setMessage('Connection issue detected. Please refresh the page and try again.');
-        } else {
-          setMessage('Unable to process subscription. Please try again.');
-        }
+        setMessage('Unable to process subscription. Please try again.');
         setIsSuccess(false);
         return;
       }
@@ -47,7 +41,7 @@ const NewsletterForm = () => {
         setIsSuccess(false);
       } else if (data && data.success) {
         console.log('Success:', data.message);
-        setMessage(data.message);
+        setMessage(data.message || 'Successfully subscribed! Welcome to our newsletter.');
         setIsSuccess(true);
         setEmail('');
       } else {
@@ -58,26 +52,7 @@ const NewsletterForm = () => {
       }
     } catch (error) {
       console.error('Newsletter subscription error:', error);
-      console.error('Error details:', {
-        message: error.message,
-        status: error.status,
-        details: error.details,
-        name: error.name,
-        stack: error.stack
-      });
-      
-      // More user-friendly error messages based on error type
-      if (error.name === 'FunctionsHttpError') {
-        setMessage('Our subscription service is currently unavailable. Please try again in a few minutes.');
-      } else if (error.message && error.message.includes('network')) {
-        setMessage('Network error. Please check your connection and try again.');
-      } else if (error.message && error.message.includes('CORS')) {
-        setMessage('Connection issue detected. Please refresh the page and try again.');
-      } else if (error.message && error.message.includes('Failed to send a request')) {
-        setMessage('Service connection failed. Please try refreshing the page.');
-      } else {
-        setMessage('Something went wrong. Please try again later.');
-      }
+      setMessage('Something went wrong. Please try again later.');
       setIsSuccess(false);
     } finally {
       setIsLoading(false);
