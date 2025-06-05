@@ -39,7 +39,7 @@ const handler = async (req) => {
   }
 
   try {
-    const { type, email } = await req.json();
+    const { type, email, data } = await req.json();
     console.log(`Sending ${type} email to: ${email}`);
 
     let emailData;
@@ -55,6 +55,22 @@ const handler = async (req) => {
             <p>Thank you for subscribing to our newsletter. We're excited to have you on board!</p>
             <p>You'll receive updates about our latest content, news, and exclusive offers.</p>
             <p>If you have any questions, feel free to reach out to us.</p>
+            <p>Best regards,<br>The Team</p>
+          </div>
+        `,
+      };
+    } else if (type === 'book_announcement') {
+      emailData = {
+        from: "Newsletter <onboarding@resend.dev>",
+        to: [email],
+        subject: `New Book Release: ${data.bookTitle}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #333;">New Book Release!</h1>
+            <h2 style="color: #555;">${data.bookTitle}</h2>
+            <p>${data.description}</p>
+            <p><strong>Price: ${data.price}</strong></p>
+            <p>Don't miss out on this exciting new release!</p>
             <p>Best regards,<br>The Team</p>
           </div>
         `,
