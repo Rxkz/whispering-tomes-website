@@ -1,10 +1,11 @@
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.8';
 
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://whispering-tomes-website.lovable.app",
+  "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Allow-Headers": "authorization, apikey, x-client-info, content-type",
+  "Access-Control-Allow-Headers": "authorization, apikey, x-client-info, content-type, x-requested-with, accept, origin, referer, user-agent",
   "Access-Control-Max-Age": "86400",
   "Access-Control-Allow-Credentials": "false"
 };
