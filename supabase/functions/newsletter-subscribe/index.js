@@ -4,9 +4,10 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.8';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-requested-with',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS, GET',
   'Access-Control-Max-Age': '86400',
+  'Access-Control-Allow-Credentials': 'false',
 };
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL');
@@ -24,10 +25,10 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 const handler = async (req) => {
-  console.log('Newsletter subscribe function called with method:', req.method);
-  console.log('Request headers:', Object.fromEntries(req.headers.entries()));
-  console.log('Request URL:', req.url);
-  console.log('Request origin:', req.headers.get('origin'));
+  console.log('Newsletter subscribe function called');
+  console.log('Method:', req.method);
+  console.log('Origin:', req.headers.get('origin'));
+  console.log('URL:', req.url);
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -52,7 +53,7 @@ const handler = async (req) => {
 
   try {
     const requestBody = await req.json();
-    console.log('Request body:', requestBody);
+    console.log('Request body received:', requestBody);
     
     const { email } = requestBody;
     
