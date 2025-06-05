@@ -5,6 +5,10 @@ const Index = () => {
   const [bookHovered, setBookHovered] = useState(false);
   const [dustParticles, setDustParticles] = useState<Array<{id: number, size: number, x: number, y: number, delay: number}>>([]);
   const heroRef = useRef<HTMLDivElement>(null);
+  // Newsletter subscribe states
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
   
   // Generate dust particles
   useEffect(() => {
@@ -164,20 +168,60 @@ const Index = () => {
             <p className="text-ivory/80 mb-8 max-w-xl mx-auto">
               Subscribe to receive exclusive content, early access to new releases, and invitations to special events.
             </p>
-            <form className="flex flex-col sm:flex-row gap-4 justify-center">
-              <input 
-                type="email" 
-                placeholder="Your email address" 
+            <form
+              className="flex flex-col sm:flex-row gap-4 justify-center"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                setLoading(true);
+                setMessage(null);
+                try {
+                  const res = await fetch(
+                    "https://sbywbwrhcrmtbbmsupbm.supabase.co/functions/v1/newsletter-subscribe",
+                    {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({
+                        to: email,
+                        subject: "Thanks for subscribing!",
+                        html: `<p>Thank you for subscribing to our newsletter. You'll receive updates soon!</p>`
+                      })
+                    }
+                  );
+                  const data = await res.json();
+                  if (res.ok) {
+                    setMessage("Subscription successful! Please check your email.");
+                    setEmail("");
+                  } else {
+                    setMessage(data.error?.message || "Failed to subscribe. Please try again.");
+                  }
+                } catch (err) {
+                  setMessage("An error occurred. Please try again later.");
+                } finally {
+                  setLoading(false);
+                }
+              }}
+            >
+              <input
+                type="email"
+                placeholder="Your email address"
                 className="bg-navy/50 border border-gold/30 rounded px-4 py-3 text-ivory focus:outline-none focus:border-gold flex-grow max-w-md"
                 aria-label="Email for newsletter"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                required
+                disabled={loading}
               />
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className="gold-btn"
+                disabled={loading || !email}
               >
-                Subscribe
+                {loading ? "Subscribing..." : "Subscribe"}
               </button>
             </form>
+            {message && (
+              <div className="mt-4 text-gold font-cormorant text-lg">{message}</div>
+            )}
           </div>
         </div>
       </section>
