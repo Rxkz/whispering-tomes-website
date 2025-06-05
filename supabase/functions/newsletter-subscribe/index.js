@@ -24,6 +24,7 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 const handler = async (req) => {
   console.log('Newsletter subscribe function called with method:', req.method);
+  console.log('Request headers:', Object.fromEntries(req.headers.entries()));
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {

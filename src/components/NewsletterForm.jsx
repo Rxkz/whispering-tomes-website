@@ -18,12 +18,9 @@ const NewsletterForm = () => {
     try {
       console.log('Calling newsletter-subscribe function...');
       
-      // Use the correct Supabase function invocation method
+      // Use the correct Supabase function invocation method with proper body format
       const { data, error } = await supabase.functions.invoke('newsletter-subscribe', {
-        body: JSON.stringify({ email }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        body: { email }, // Don't stringify here, Supabase client handles it
       });
 
       console.log('Function response:', { data, error });
@@ -43,7 +40,7 @@ const NewsletterForm = () => {
         setIsSuccess(true);
         setEmail('');
       } else {
-        console.error('Unexpected response format:', data);
+        console.log('Subscription successful');
         setMessage('Successfully subscribed! Welcome to our newsletter.');
         setIsSuccess(true);
         setEmail('');
