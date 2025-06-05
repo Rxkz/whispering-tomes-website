@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import emailjs from 'emailjs-com';
 
 const Index = () => {
   const [bookHovered, setBookHovered] = useState(false);
@@ -237,31 +238,23 @@ const Index = () => {
                 e.preventDefault();
                 setLoading(true);
                 setMessage(null);
-                try {
-                  const res = await fetch(
-                    "https://sbywbwrhcrmtbbmsupbm.supabase.co/functions/v1/newsletter-subscribe",
-                    {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({
-                        to: email,
-                        subject: "Thanks for subscribing!",
-                        html: `<p>Thank you for subscribing to our newsletter. You'll receive updates soon!</p>`
-                      })
-                    }
-                  );
-                  const data = await res.json();
-                  if (res.ok) {
-                    setMessage("Subscription successful! Please check your email.");
-                    setEmail("");
-                  } else {
-                    setMessage(data.error?.message || "Failed to subscribe. Please try again.");
-                  }
-                } catch (err) {
-                  setMessage("An error occurred. Please try again later.");
-                } finally {
-                  setLoading(false);
-                }
+                // TODO: Replace with your actual EmailJS service/template/user IDs
+                const SERVICE_ID = 'service_wjz3oia';
+                const TEMPLATE_ID = 'template_5zgxxmm';
+                const USER_ID = '_y4S2_F3kCEksm3lh';
+                emailjs.send(
+                  SERVICE_ID,
+                  TEMPLATE_ID,
+                  { user_email: email },
+                  USER_ID
+                )
+                .then((result) => {
+                  setMessage('Subscription successful! Please check your email.');
+                  setEmail('');
+                }, (error) => {
+                  setMessage('Failed to subscribe. Please try again.');
+                })
+                .finally(() => setLoading(false));
               }}
             >
               <input
@@ -273,6 +266,7 @@ const Index = () => {
                 onChange={e => setEmail(e.target.value)}
                 required
                 disabled={loading}
+                name="user_email"
               />
               <button
                 type="submit"
