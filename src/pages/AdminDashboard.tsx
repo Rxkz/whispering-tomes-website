@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,6 +18,17 @@ const AdminDashboard = () => {
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
+  const [bookCount, setBookCount] = useState(0);
+
+  useEffect(() => {
+    const fetchBookCount = async () => {
+      const { count, error } = await supabase.from('books').select('*', { count: 'exact', head: true });
+      if (!error && typeof count === 'number') {
+        setBookCount(count);
+      }
+    };
+    fetchBookCount();
+  }, []);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -89,7 +100,7 @@ const AdminDashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold text-ivory">0</p>
+              <p className="text-2xl font-bold text-ivory">{bookCount}</p>
               <p className="text-sm text-ivory/70">Books in library</p>
             </CardContent>
           </Card>
