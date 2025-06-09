@@ -14,11 +14,13 @@ const AdminDashboard = () => {
     author: '',
     description: '',
     price: '',
-    cover_image_url: '',
   });
+  const [coverFile, setCoverFile] = useState(null);
+  const [coverPreview, setCoverPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [bookCount, setBookCount] = useState(0);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
     const fetchBookCount = async () => {
@@ -34,11 +36,39 @@ const AdminDashboard = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      setCoverFile(file);
+      setCoverPreview(URL.createObjectURL(file));
+    } else {
+      setCoverFile(null);
+      setCoverPreview(null);
+      alert('Please select a valid image file.');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage(null);
-    const { title, author, description, price, cover_image_url } = form;
+    let cover_image_url = '';
+    if (coverFile) {
+      const fileExt = coverFile.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+      const { data, error: uploadError } = await supabase.storage.from('img').upload(fileName, coverFile, { cacheControl: '3600', upsert: false });
+      if (uploadError) {
+        setLoading(false);
+        setMessage('Error uploading image: ' + uploadError.message);
+        return;
+      }
+      cover_image_url = `${supabase.storage.from('img').getPublicUrl(fileName).data.publicUrl}`;
+    } else {
+      setLoading(false);
+      setMessage('Please select a cover image.');
+      return;
+    }
+    const { title, author, description, price } = form;
     const { error } = await supabase.from('books').insert([
       {
         title,
@@ -53,8 +83,12 @@ const AdminDashboard = () => {
       setMessage('Error adding book: ' + error.message);
     } else {
       setMessage('Book added successfully!');
-      setForm({ title: '', author: '', description: '', price: '', cover_image_url: '' });
+      setForm({ title: '', author: '', description: '', price: '' });
+      setCoverFile(null);
+      setCoverPreview(null);
       setShowModal(false);
+      setShowSuccess(true);
+      setTimeout(() => setShowSuccess(false), 2500);
     }
   };
 
@@ -181,11 +215,20 @@ const AdminDashboard = () => {
                 <input name="author" value={form.author} onChange={handleChange} placeholder="Author" className="w-full p-2 rounded bg-navy border border-gold/30 text-ivory" required />
                 <textarea name="description" value={form.description} onChange={handleChange} placeholder="Description" className="w-full p-2 rounded bg-navy border border-gold/30 text-ivory" required />
                 <input name="price" value={form.price} onChange={handleChange} placeholder="Price" type="number" step="0.01" className="w-full p-2 rounded bg-navy border border-gold/30 text-ivory" required />
-                <input name="cover_image_url" value={form.cover_image_url} onChange={handleChange} placeholder="Cover Image URL" className="w-full p-2 rounded bg-navy border border-gold/30 text-ivory" required />
-                <span className="text-xs text-antique block mb-2">Use a direct image URL ending in .jpg, .png, etc. (not a Google search link or data URL)</span>
+                <input type="file" accept="image/*" onChange={handleFileChange} className="w-full p-2 rounded bg-navy border border-gold/30 text-ivory" required />
+                {coverPreview && <img src={coverPreview} alt="Preview" className="w-full h-48 object-contain mb-2 border border-gold/30" />}
+                <span className="text-xs text-antique block mb-2">Upload a cover image (jpg, png, etc.).</span>
                 <button type="submit" className="w-full bg-gold text-navy py-2 rounded hover:bg-gold/90" disabled={loading}>{loading ? 'Adding...' : 'Add Book'}</button>
                 {message && <div className="text-center text-gold mt-2">{message}</div>}
               </form>
+            </div>
+          </div>
+        )}
+
+        {showSuccess && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center">
+            <div className="bg-navy border border-gold px-8 py-5 rounded shadow-lg text-gold font-cormorant text-lg animate-fade-in">
+              Book added!
             </div>
           </div>
         )}

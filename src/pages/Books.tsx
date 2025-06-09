@@ -34,6 +34,10 @@ const Books = () => {
   });
   const [editLoading, setEditLoading] = useState(false);
   const [editMessage, setEditMessage] = useState(null);
+  const [actionMessage, setActionMessage] = useState('');
+  const [showAction, setShowAction] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteId, setDeleteId] = useState(null);
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -60,9 +64,35 @@ const Books = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this book?')) return;
+    setDeleteId(id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    const id = deleteId;
+    const bookToDelete = books.find((b) => String(b.id) === String(id));
+    setShowDeleteModal(false);
     await supabase.from('books').delete().eq('id', id);
     setBooks(books.filter((b) => String(b.id) !== String(id)));
+    // Delete image from storage
+    if (bookToDelete && bookToDelete.cover_image_url) {
+      try {
+        const urlParts = bookToDelete.cover_image_url.split('/');
+        const fileName = urlParts[urlParts.length - 1];
+        await supabase.storage.from('img').remove([fileName]);
+      } catch (e) {
+        // Optionally log error
+      }
+    }
+    setActionMessage('Book deleted!');
+    setShowAction(true);
+    setTimeout(() => setShowAction(false), 2500);
+    setDeleteId(null);
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setDeleteId(null);
   };
 
   const openEditModal = (book) => {
@@ -101,6 +131,9 @@ const Books = () => {
       setEditMessage('Book updated successfully!');
       setBooks(books.map((b) => String(b.id) === String(id) ? { ...b, title, author, description, price, cover_image_url } : b));
       setEditModal(false);
+      setActionMessage('Book updated!');
+      setShowAction(true);
+      setTimeout(() => setShowAction(false), 2500);
     }
   };
 
@@ -363,6 +396,25 @@ const Books = () => {
               <button type="submit" className="w-full bg-gold text-navy py-2 rounded hover:bg-gold/90" disabled={editLoading}>{editLoading ? 'Updating...' : 'Update Book'}</button>
               {editMessage && <div className="text-center text-gold mt-2">{editMessage}</div>}
             </form>
+          </div>
+        </div>
+      )}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+          <div className="bg-navy p-8 rounded-lg shadow-lg w-full max-w-sm text-center border border-gold">
+            <h2 className="text-2xl text-gold mb-4 font-cormorant">Delete Book</h2>
+            <p className="text-ivory mb-6">Are you sure you want to delete this book?</p>
+            <div className="flex justify-center gap-4">
+              <button onClick={confirmDelete} className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 font-cormorant">Delete</button>
+              <button onClick={cancelDelete} className="bg-gold text-navy px-4 py-2 rounded hover:bg-gold/90 font-cormorant">Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showAction && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="bg-navy border border-gold px-8 py-5 rounded shadow-lg text-gold font-cormorant text-lg animate-fade-in">
+            {actionMessage}
           </div>
         </div>
       )}
