@@ -35,7 +35,6 @@ const AdminDashboard = () => {
         description,
         price: parseFloat(price),
         cover_image_url,
-        user_id: user?.id || null,
       },
     ]);
     setLoading(false);
@@ -172,6 +171,7 @@ const AdminDashboard = () => {
                 <textarea name="description" value={form.description} onChange={handleChange} placeholder="Description" className="w-full p-2 rounded bg-navy border border-gold/30 text-ivory" required />
                 <input name="price" value={form.price} onChange={handleChange} placeholder="Price" type="number" step="0.01" className="w-full p-2 rounded bg-navy border border-gold/30 text-ivory" required />
                 <input name="cover_image_url" value={form.cover_image_url} onChange={handleChange} placeholder="Cover Image URL" className="w-full p-2 rounded bg-navy border border-gold/30 text-ivory" required />
+                <span className="text-xs text-antique block mb-2">Use a direct image URL ending in .jpg, .png, etc. (not a Google search link or data URL)</span>
                 <button type="submit" className="w-full bg-gold text-navy py-2 rounded hover:bg-gold/90" disabled={loading}>{loading ? 'Adding...' : 'Add Book'}</button>
                 {message && <div className="text-center text-gold mt-2">{message}</div>}
               </form>
