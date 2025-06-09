@@ -23,6 +23,17 @@ const Books = () => {
   const [openBook, setOpenBook] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editModal, setEditModal] = useState(false);
+  const [editForm, setEditForm] = useState({
+    id: '',
+    title: '',
+    author: '',
+    description: '',
+    price: '',
+    cover_image_url: '',
+  });
+  const [editLoading, setEditLoading] = useState(false);
+  const [editMessage, setEditMessage] = useState(null);
 
   useEffect(() => {
     const fetchBooks = async () => {
@@ -48,10 +59,49 @@ const Books = () => {
     setTimeout(() => setSelectedBook(null), 500);
   };
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this book?')) return;
     await supabase.from('books').delete().eq('id', id);
-    setBooks(books.filter((b) => b.id !== id));
+    setBooks(books.filter((b) => String(b.id) !== String(id)));
+  };
+
+  const openEditModal = (book) => {
+    setEditForm({
+      id: book.id,
+      title: book.title,
+      author: book.author,
+      description: book.description,
+      price: book.price,
+      cover_image_url: book.cover_image_url,
+    });
+    setEditMessage(null);
+    setEditModal(true);
+  };
+
+  const handleEditChange = (e) => {
+    setEditForm({ ...editForm, [e.target.name]: e.target.value });
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setEditLoading(true);
+    setEditMessage(null);
+    const { id, title, author, description, price, cover_image_url } = editForm;
+    const { error } = await supabase.from('books').update({
+      title,
+      author,
+      description,
+      price: parseFloat(price),
+      cover_image_url,
+    }).eq('id', id);
+    setEditLoading(false);
+    if (error) {
+      setEditMessage('Error updating book: ' + error.message);
+    } else {
+      setEditMessage('Book updated successfully!');
+      setBooks(books.map((b) => String(b.id) === String(id) ? { ...b, title, author, description, price, cover_image_url } : b));
+      setEditModal(false);
+    }
   };
 
   return (
@@ -91,12 +141,20 @@ const Books = () => {
                   </button>
                 </div>
                 {isAdmin && (
-                  <button
-                    className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded text-xs z-10 hover:bg-red-700"
-                    onClick={(e) => { e.stopPropagation(); handleDelete(book.id); }}
-                  >
-                    Delete
-                  </button>
+                  <div className="absolute top-2 right-2 flex flex-col gap-2 z-10">
+                    <button
+                      className="bg-red-600 text-white px-2 py-1 rounded text-xs hover:bg-red-700"
+                      onClick={e => { e.stopPropagation(); handleDelete(String(book.id)); }}
+                    >
+                      Delete
+                    </button>
+                    <button
+                      className="bg-gold text-navy px-2 py-1 rounded text-xs hover:bg-gold/90"
+                      onClick={e => { e.stopPropagation(); openEditModal({ ...book, id: String(book.id) }); }}
+                    >
+                      Edit
+                    </button>
+                  </div>
                 )}
               </div>
             ))}
@@ -290,6 +348,24 @@ const Books = () => {
           </div>
         </div>
       </div>
+      {editModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+          <div className="bg-navy p-8 rounded-lg shadow-lg w-full max-w-md relative">
+            <button className="absolute top-2 right-2 text-gold" onClick={() => setEditModal(false)}>&times;</button>
+            <h2 className="text-2xl text-gold mb-4 font-cormorant">Edit Book</h2>
+            <form onSubmit={handleEditSubmit} className="space-y-4">
+              <input name="title" value={editForm.title} onChange={handleEditChange} placeholder="Title" className="w-full p-2 rounded bg-navy border border-gold/30 text-ivory" required />
+              <input name="author" value={editForm.author} onChange={handleEditChange} placeholder="Author" className="w-full p-2 rounded bg-navy border border-gold/30 text-ivory" required />
+              <textarea name="description" value={editForm.description} onChange={handleEditChange} placeholder="Description" className="w-full p-2 rounded bg-navy border border-gold/30 text-ivory" required />
+              <input name="price" value={editForm.price} onChange={handleEditChange} placeholder="Price" type="number" step="0.01" className="w-full p-2 rounded bg-navy border border-gold/30 text-ivory" required />
+              <input name="cover_image_url" value={editForm.cover_image_url} onChange={handleEditChange} placeholder="Cover Image URL" className="w-full p-2 rounded bg-navy border border-gold/30 text-ivory" required />
+              <span className="text-xs text-antique block mb-2">Use a direct image URL ending in .jpg, .png, etc. (not a Google search link or data URL)</span>
+              <button type="submit" className="w-full bg-gold text-navy py-2 rounded hover:bg-gold/90" disabled={editLoading}>{editLoading ? 'Updating...' : 'Update Book'}</button>
+              {editMessage && <div className="text-center text-gold mt-2">{editMessage}</div>}
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
