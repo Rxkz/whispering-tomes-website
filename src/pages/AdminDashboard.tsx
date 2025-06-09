@@ -14,6 +14,9 @@ const AdminDashboard = () => {
     author: '',
     description: '',
     price: '',
+    release_date: '',
+    pages: '',
+    format: 'Hardcover, E-book',
   });
   const [coverFile, setCoverFile] = useState(null);
   const [coverPreview, setCoverPreview] = useState(null);
@@ -21,6 +24,8 @@ const AdminDashboard = () => {
   const [message, setMessage] = useState(null);
   const [bookCount, setBookCount] = useState(0);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [pdfFile, setPdfFile] = useState(null);
+  const [pdfName, setPdfName] = useState('');
 
   useEffect(() => {
     const fetchBookCount = async () => {
@@ -48,11 +53,25 @@ const AdminDashboard = () => {
     }
   };
 
+  const handlePdfChange = (e) => {
+    const file = e.target.files[0];
+    if (file && file.type === 'application/pdf') {
+      setPdfFile(file);
+      setPdfName(file.name);
+    } else {
+      setPdfFile(null);
+      setPdfName('');
+      alert('Please select a valid PDF file.');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage(null);
     let cover_image_url = '';
+    let ebook = '';
+    // Upload cover image
     if (coverFile) {
       const fileExt = coverFile.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
@@ -68,7 +87,23 @@ const AdminDashboard = () => {
       setMessage('Please select a cover image.');
       return;
     }
-    const { title, author, description, price } = form;
+    // Upload PDF
+    if (pdfFile) {
+      const fileExt = pdfFile.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+      const { data, error: pdfError } = await supabase.storage.from('ebook').upload(fileName, pdfFile, { cacheControl: '3600', upsert: false });
+      if (pdfError) {
+        setLoading(false);
+        setMessage('Error uploading PDF: ' + pdfError.message);
+        return;
+      }
+      ebook = fileName; // Store the storage path (file name)
+    } else {
+      setLoading(false);
+      setMessage('Please select a PDF file.');
+      return;
+    }
+    const { title, author, description, price, release_date, pages, format } = form;
     const { error } = await supabase.from('books').insert([
       {
         title,
@@ -76,6 +111,10 @@ const AdminDashboard = () => {
         description,
         price: parseFloat(price),
         cover_image_url,
+        ebook,
+        release_date,
+        pages: pages ? parseInt(pages) : null,
+        format,
       },
     ]);
     setLoading(false);
@@ -83,9 +122,11 @@ const AdminDashboard = () => {
       setMessage('Error adding book: ' + error.message);
     } else {
       setMessage('Book added successfully!');
-      setForm({ title: '', author: '', description: '', price: '' });
+      setForm({ title: '', author: '', description: '', price: '', release_date: '', pages: '', format: 'Hardcover, E-book' });
       setCoverFile(null);
       setCoverPreview(null);
+      setPdfFile(null);
+      setPdfName('');
       setShowModal(false);
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 2500);
@@ -207,17 +248,31 @@ const AdminDashboard = () => {
 
         {showModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-            <div className="bg-navy p-8 rounded-lg shadow-lg w-full max-w-md relative">
+            <div className="bg-navy p-8 rounded-lg shadow-lg w-full max-w-2xl relative overflow-y-auto max-h-[90vh]">
               <button className="absolute top-2 right-2 text-gold" onClick={() => setShowModal(false)}>&times;</button>
               <h2 className="text-2xl text-gold mb-4 font-cormorant">Add New Book</h2>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <input name="title" value={form.title} onChange={handleChange} placeholder="Title" className="w-full p-2 rounded bg-navy border border-gold/30 text-ivory" required />
-                <input name="author" value={form.author} onChange={handleChange} placeholder="Author" className="w-full p-2 rounded bg-navy border border-gold/30 text-ivory" required />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input name="title" value={form.title} onChange={handleChange} placeholder="Title" className="w-full p-2 rounded bg-navy border border-gold/30 text-ivory" required />
+                  <input name="author" value={form.author} onChange={handleChange} placeholder="Author" className="w-full p-2 rounded bg-navy border border-gold/30 text-ivory" required />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <input name="price" value={form.price} onChange={handleChange} placeholder="Price" type="number" step="0.01" className="w-full p-2 rounded bg-navy border border-gold/30 text-ivory" required />
+                  <input name="pages" value={form.pages} onChange={handleChange} placeholder="Pages" type="number" className="w-full p-2 rounded bg-navy border border-gold/30 text-ivory" required />
+                  <input name="release_date" value={form.release_date} onChange={handleChange} placeholder="Release Date" type="date" className="w-full p-2 rounded bg-navy border border-gold/30 text-ivory" required />
+                </div>
+                <input name="format" value={form.format} onChange={handleChange} placeholder="Format (e.g. Hardcover, E-book)" className="w-full p-2 rounded bg-navy border border-gold/30 text-ivory" required />
                 <textarea name="description" value={form.description} onChange={handleChange} placeholder="Description" className="w-full p-2 rounded bg-navy border border-gold/30 text-ivory" required />
-                <input name="price" value={form.price} onChange={handleChange} placeholder="Price" type="number" step="0.01" className="w-full p-2 rounded bg-navy border border-gold/30 text-ivory" required />
-                <input type="file" accept="image/*" onChange={handleFileChange} className="w-full p-2 rounded bg-navy border border-gold/30 text-ivory" required />
-                {coverPreview && <img src={coverPreview} alt="Preview" className="w-full h-48 object-contain mb-2 border border-gold/30" />}
-                <span className="text-xs text-antique block mb-2">Upload a cover image (jpg, png, etc.).</span>
+                <div>
+                  <input type="file" accept="image/*" onChange={handleFileChange} className="w-full p-2 rounded bg-navy border border-gold/30 text-ivory" required />
+                  {coverPreview && <img src={coverPreview} alt="Preview" className="w-full h-48 object-contain mb-2 border border-gold/30" />}
+                  <span className="text-xs text-antique block mb-2">Upload a cover image (jpg, png, etc.).</span>
+                </div>
+                <div>
+                  <input type="file" accept="application/pdf" onChange={handlePdfChange} className="w-full p-2 rounded bg-navy border border-gold/30 text-ivory" required />
+                  {pdfName && <div className="text-xs text-gold mb-2">Selected PDF: {pdfName}</div>}
+                  <span className="text-xs text-antique block mb-2">Upload the book PDF (only .pdf allowed).</span>
+                </div>
                 <button type="submit" className="w-full bg-gold text-navy py-2 rounded hover:bg-gold/90" disabled={loading}>{loading ? 'Adding...' : 'Add Book'}</button>
                 {message && <div className="text-center text-gold mt-2">{message}</div>}
               </form>
