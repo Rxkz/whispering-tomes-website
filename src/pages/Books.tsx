@@ -139,6 +139,33 @@ const Books = () => {
     }
   };
 
+  const handlePurchase = async () => {
+    if (!user) {
+      alert("Please sign in to purchase.");
+      return;
+    }
+    try {
+      // Replace with your ngrok URL if using ngrok
+      const res = await fetch("http://localhost:4242/create-checkout-session", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          bookId: selectedBook.id,
+          userId: user.id,
+          email: user.email,
+        }),
+      });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url; // Redirect to Stripe Checkout
+      } else {
+        alert("Failed to start checkout.");
+      }
+    } catch (err) {
+      alert("Error starting checkout.");
+    }
+  };
+
   return (
     <div className="min-h-screen pt-24 pb-16 px-4">
       <div className="container mx-auto">
@@ -247,7 +274,7 @@ const Books = () => {
                   </div>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <button className="gold-btn flex-1">Purchase</button>
+                  <button className="gold-btn flex-1" onClick={handlePurchase}>Purchase</button>
                   <button className="border border-gold/30 hover:border-gold text-antique hover:text-gold py-2 px-6 rounded transition-all duration-300 flex-1 font-cormorant uppercase tracking-widest text-sm">
                     Add to Wishlist
                   </button>

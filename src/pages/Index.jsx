@@ -241,7 +241,7 @@ const Index = () => {
                 // TODO: Replace with your actual EmailJS service/template/user IDs
                 const SERVICE_ID = 'service_wjz3oia';
                 const TEMPLATE_ID = 'template_5zgxxmm';
-                const USER_ID = '_y4S2_F3kCEksm3lh';
+                const USER_ID = 'Cg9lzCetBWOJH-vs4';
                 emailjs.send(
                   SERVICE_ID,
                   TEMPLATE_ID,
