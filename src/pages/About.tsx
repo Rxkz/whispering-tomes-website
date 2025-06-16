@@ -24,7 +24,7 @@ const About = () => {
     setResult('');
     emailjs.send(
       'service_wjz3oia',
-      'template_hd1ldze',
+      'template_pjy89l4',
       {
         from_name: form.name,
         from_email: form.email,
@@ -32,7 +32,7 @@ const About = () => {
         message: form.message,
         current_date: new Date().toLocaleString()
       },
-      '_y4S2_F3kCEksm3lh'
+      'Cg9lzCetBWOJH-vs4'
     )
     .then(() => {
       setResult('Message sent! Thank you for reaching out.');
