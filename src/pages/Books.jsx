@@ -3,28 +3,13 @@ import Hero3DBook from '../components/Hero3DBook';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../integrations/supabase/client';
 
-interface Book {
-  id: number;
-  title: string;
-  cover: string;
-  description: string;
-  price: string;
-  releaseDate: string;
-  pages: number;
-  excerpt: string;
-  cover_image_url: string;
-  author: string;
-  release_date?: string;
-  format?: string;
-}
-
 const Books = () => {
   const { user, isAdmin } = useAuth();
-  const [books, setBooks] = useState<Book[]>([]);
-  const [selectedBook, setSelectedBook] = useState<Book | null>(null);
+  const [books, setBooks] = useState([]);
+  const [selectedBook, setSelectedBook] = useState(null);
   const [openBook, setOpenBook] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(null);
   const [editModal, setEditModal] = useState(false);
   const [editForm, setEditForm] = useState({
     id: '',
@@ -55,7 +40,7 @@ const Books = () => {
     fetchBooks();
   }, []);
 
-  const handleBookClick = (book: Book) => {
+  const handleBookClick = (book) => {
     setSelectedBook(book);
     setTimeout(() => setOpenBook(true), 300);
   };
@@ -65,7 +50,7 @@ const Books = () => {
     setTimeout(() => setSelectedBook(null), 500);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id) => {
     setDeleteId(id);
     setShowDeleteModal(true);
   };
@@ -145,7 +130,6 @@ const Books = () => {
       return;
     }
     try {
-      // Replace with your ngrok URL if using ngrok
       const res = await fetch("http://localhost:4242/create-checkout-session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -157,7 +141,7 @@ const Books = () => {
       });
       const data = await res.json();
       if (data.url) {
-        window.location.href = data.url; // Redirect to Stripe Checkout
+        window.location.href = data.url;
       } else {
         alert("Failed to start checkout.");
       }
@@ -175,7 +159,6 @@ const Books = () => {
             <span className="absolute -bottom-3 left-0 right-0 h-0.5 bg-gold/30"></span>
           </span>
         </h1>
-        
         {/* Books Display */}
         {loading ? (
           <div className="text-center text-gold">Loading books...</div>
@@ -222,7 +205,6 @@ const Books = () => {
             ))}
           </div>
         )}
-        
         {/* Book Detail Modal */}
         {selectedBook && (
           <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ${openBook ? 'opacity-100' : 'opacity-0'}`}>
@@ -283,7 +265,6 @@ const Books = () => {
             </div>
           </div>
         )}
-        
         {/* Upcoming Releases */}
         <div className="max-w-4xl mx-auto mt-20">
           <h2 className="text-3xl font-cormorant font-bold text-gold text-center mb-10">
@@ -292,7 +273,6 @@ const Books = () => {
               <span className="absolute -bottom-2 left-0 right-0 h-0.5 bg-gold/30"></span>
             </span>
           </h2>
-          
           <div className="book-page p-8">
             <div className="space-y-8">
               <div className="flex flex-col md:flex-row gap-6">
@@ -316,7 +296,6 @@ const Books = () => {
                   </button>
                 </div>
               </div>
-              
               <div className="border-t border-gold/20 pt-8">
                 <h3 className="text-2xl font-cormorant font-semibold text-gold mb-6">Preorder Benefits</h3>
                 <ul className="space-y-4">
@@ -400,4 +379,4 @@ const Books = () => {
   );
 };
 
-export default Books;
+export default Books; 

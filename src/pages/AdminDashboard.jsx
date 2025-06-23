@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
+import { Button } from '../components/ui/button';
 import { Users, BookOpen, ShoppingCart, Settings } from 'lucide-react';
 import { supabase } from '../integrations/supabase/client';
 
@@ -97,7 +97,7 @@ const AdminDashboard = () => {
         setMessage('Error uploading PDF: ' + pdfError.message);
         return;
       }
-      ebook = fileName; // Store the storage path (file name)
+      ebook = fileName;
     } else {
       setLoading(false);
       setMessage('Please select a PDF file.');
@@ -292,4 +292,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard;
+export default AdminDashboard; 

@@ -1,0 +1,422 @@
+WHISPERING TOMES - AUTHOR WEBSITE PROJECT PROPOSAL
+================================================================
+
+1. INTRODUCTION
+================================================================
+Project Name: Whispering Tomes - Kia Beniston Author Website
+Project Type: Full-Stack E-Commerce Author Platform
+Client: Kia Beniston (Fictional Author)
+Project Duration: 8 weeks
+Team Size: 3 members
+
+This proposal outlines the development of a sophisticated dark academia-themed author website 
+that serves as both a portfolio and e-commerce platform for digital book sales. The platform 
+will feature an immersive 3D book experience, secure payment processing, and comprehensive 
+admin management capabilities.
+
+2. PROJECT OVERVIEW
+================================================================
+The Whispering Tomes website is a modern, responsive web application built with React, 
+TypeScript, and Node.js. It combines elegant design with robust functionality to create 
+an engaging platform for book discovery and purchase.
+
+Key Features:
+• Interactive 3D book visualization using Three.js
+• Secure e-commerce with Stripe integration
+• Admin dashboard for content management
+• Responsive design with dark academia aesthetic
+• Real-time email delivery system
+• User authentication and role management
+
+Technology Stack:
+Frontend: React 18, TypeScript, Tailwind CSS, shadcn/ui
+Backend: Node.js, Express.js, Supabase
+3D Graphics: Three.js, GSAP
+Payments: Stripe
+Email: SendGrid
+Database: Supabase (PostgreSQL)
+
+3. PROJECT OBJECTIVE
+================================================================
+Primary Objectives:
+• Create an immersive author website that reflects the dark academia theme
+• Implement secure e-commerce functionality for digital book sales
+• Provide comprehensive admin tools for content management
+• Deliver a responsive, accessible user experience
+• Establish a scalable architecture for future growth
+
+Success Criteria:
+• Website loads within 3 seconds on all devices
+• 99.9% uptime for e-commerce functionality
+• Mobile-responsive design across all screen sizes
+• Secure payment processing with PCI compliance
+• Admin can manage all content without technical assistance
+
+4. PROJECT SCOPE
+================================================================
+In Scope:
+• User authentication and authorization system
+• Book catalog with search and filtering
+• 3D interactive book visualization
+• Secure payment processing
+• Admin dashboard for content management
+• Email notification system
+• Responsive design implementation
+• SEO optimization
+• Performance optimization
+
+Out of Scope:
+• Physical book sales integration
+• Multi-language support (Phase 2)
+• Advanced analytics dashboard (Phase 2)
+• Mobile app development (Phase 2)
+• Social media integration (Phase 2)
+
+5. METHODOLOGY - AGILE
+================================================================
+We will follow Agile methodology with 2-week sprints:
+
+Sprint Structure:
+• Sprint Planning: 2 hours
+• Daily Standups: 15 minutes
+• Sprint Review: 1 hour
+• Sprint Retrospective: 1 hour
+
+Agile Tools:
+• GitHub for version control and issue tracking
+• Discord/Slack for team communication
+• Figma for design collaboration
+• Notion for documentation
+
+Code Management:
+```bash
+# Git workflow
+git checkout -b feature/user-authentication
+git add .
+git commit -m "feat: implement user authentication with Supabase"
+git push origin feature/user-authentication
+git checkout main
+git merge feature/user-authentication
+```
+
+6. PROJECT TEAM
+================================================================
+Team Composition:
+
+Kartik - Frontend Lead & UI/UX Designer
+• Responsibilities: React development, component architecture, design system
+• Skills: React, TypeScript, Tailwind CSS, Three.js, UI/UX design
+• Code Focus: Components, styling, 3D visualization
+
+Rikhil - Backend Lead & DevOps
+• Responsibilities: API development, database design, deployment
+• Skills: Node.js, Express, Supabase, Stripe, deployment
+• Code Focus: Server logic, payment processing, email system
+
+Vis - Full-Stack Developer & Project Manager
+• Responsibilities: Project coordination, testing, documentation
+• Skills: React, Node.js, testing, project management
+• Code Focus: Integration, testing, documentation
+
+7. PROJECT STAGES
+================================================================
+Stage 1: Foundation (Weeks 1-2)
+• Project setup and environment configuration
+• Database schema design and implementation
+• Basic authentication system
+• Core UI components development
+
+Stage 2: Core Features (Weeks 3-4)
+• Book catalog implementation
+• Admin dashboard development
+• 3D book visualization
+• Basic styling and responsive design
+
+Stage 3: E-Commerce (Weeks 5-6)
+• Stripe payment integration
+• Order management system
+• Email notification setup
+• Security implementation
+
+Stage 4: Polish & Launch (Weeks 7-8)
+• Performance optimization
+• Testing and bug fixes
+• SEO implementation
+• Deployment and launch
+
+8. PROJECT DELIVERABLES
+================================================================
+Technical Deliverables:
+• Fully functional React/TypeScript frontend
+• Node.js/Express backend API
+• Supabase database with complete schema
+• Stripe payment integration
+• Admin dashboard with full CRUD operations
+• 3D book visualization component
+• Responsive design implementation
+• Email notification system
+
+Documentation Deliverables:
+• API documentation
+• User manual for admin dashboard
+• Deployment guide
+• Code documentation
+• Testing documentation
+
+Code Examples:
+
+Frontend Component Structure:
+```typescript
+// src/components/BookCard.tsx
+interface BookCardProps {
+  book: Book;
+  onPurchase: (bookId: number) => void;
+}
+
+const BookCard: React.FC<BookCardProps> = ({ book, onPurchase }) => {
+  return (
+    <div className="book-page transform hover:-translate-y-1 transition-transform duration-300">
+      <img src={book.cover_image_url} alt={book.title} />
+      <h3 className="text-gold font-cormorant">{book.title}</h3>
+      <p className="text-ivory/80">{book.description}</p>
+      <button onClick={() => onPurchase(book.id)} className="gold-btn">
+        Purchase ${book.price}
+      </button>
+    </div>
+  );
+};
+```
+
+Backend API Structure:
+```javascript
+// public/backend/index.js
+app.post('/create-checkout-session', async (req, res) => {
+  const { bookId, userId, email } = req.body;
+  
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    line_items: [{
+      price_data: {
+        currency: 'usd',
+        product_data: {
+          name: book.title,
+          description: book.description,
+        },
+        unit_amount: Math.round(book.price * 100),
+      },
+      quantity: 1,
+    }],
+    mode: 'payment',
+    success_url: 'http://localhost:8080/success',
+    cancel_url: 'http://localhost:8080/cancel',
+  });
+  
+  res.json({ url: session.url });
+});
+```
+
+9. PROJECT BUDGET
+================================================================
+Development Costs:
+• Frontend Development (Kartik): $4,000
+• Backend Development (Rikhil): $4,000
+• Full-Stack Integration (Vis): $3,000
+• UI/UX Design: $2,000
+• Testing & QA: $1,500
+
+Infrastructure Costs:
+• Supabase Pro Plan: $25/month
+• Stripe Processing Fees: 2.9% + $0.30 per transaction
+• SendGrid Email Service: $15/month
+• Domain & Hosting: $100/year
+
+Total Estimated Budget: $14,600 + Monthly Operational Costs
+
+10. PROJECT TIMELINES
+================================================================
+Week 1-2: Foundation
+• Day 1-3: Project setup and environment configuration
+• Day 4-7: Database schema and authentication
+• Day 8-10: Core UI components
+• Day 11-14: Basic routing and layout
+
+Week 3-4: Core Features
+• Day 15-21: Book catalog and admin dashboard
+• Day 22-28: 3D visualization and responsive design
+
+Week 5-6: E-Commerce
+• Day 29-35: Stripe integration and payment processing
+• Day 36-42: Order management and email system
+
+Week 7-8: Polish & Launch
+• Day 43-49: Testing, optimization, and bug fixes
+• Day 50-56: Deployment and launch preparation
+
+11. PROJECT RISKS AND MANAGEMENT
+================================================================
+Technical Risks:
+• 3D rendering performance issues
+• Payment gateway integration complexity
+• Database scaling challenges
+
+Mitigation Strategies:
+• Performance testing throughout development
+• Comprehensive error handling
+• Scalable database architecture
+
+Business Risks:
+• Timeline delays due to feature creep
+• Budget overruns
+• Team availability issues
+
+Mitigation Strategies:
+• Strict scope management
+• Regular budget reviews
+• Clear communication protocols
+
+Risk Assessment Matrix:
+```typescript
+interface Risk {
+  id: string;
+  description: string;
+  probability: 'Low' | 'Medium' | 'High';
+  impact: 'Low' | 'Medium' | 'High';
+  mitigation: string;
+}
+
+const projectRisks: Risk[] = [
+  {
+    id: 'R001',
+    description: '3D performance issues on mobile devices',
+    probability: 'Medium',
+    impact: 'High',
+    mitigation: 'Implement progressive enhancement and fallbacks'
+  },
+  {
+    id: 'R002',
+    description: 'Stripe webhook processing failures',
+    probability: 'Low',
+    impact: 'High',
+    mitigation: 'Implement retry logic and monitoring'
+  }
+];
+```
+
+12. QUALITY ASSURANCE
+================================================================
+Testing Strategy:
+• Unit Testing: Jest and React Testing Library
+• Integration Testing: API endpoint testing
+• E2E Testing: Cypress for critical user flows
+• Performance Testing: Lighthouse and WebPageTest
+• Security Testing: OWASP guidelines
+
+Code Quality Standards:
+```typescript
+// ESLint configuration
+{
+  "extends": [
+    "@typescript-eslint/recommended",
+    "eslint:recommended",
+    "plugin:react/recommended"
+  ],
+  "rules": {
+    "no-console": "warn",
+    "prefer-const": "error",
+    "no-unused-vars": "error"
+  }
+}
+```
+
+Performance Benchmarks:
+• First Contentful Paint: < 1.5s
+• Largest Contentful Paint: < 2.5s
+• Cumulative Layout Shift: < 0.1
+• First Input Delay: < 100ms
+
+13. COMMUNICATION PLAN
+================================================================
+Team Communication:
+• Daily Standups: 9:00 AM via Discord
+• Weekly Sprint Reviews: Fridays 2:00 PM
+• Bi-weekly Client Updates: Every other Monday
+• Emergency Contact: WhatsApp group
+
+Communication Tools:
+• Discord: Daily communication and quick questions
+• GitHub: Code reviews and issue tracking
+• Notion: Documentation and project management
+• Email: Formal communications and client updates
+
+Meeting Schedule:
+```typescript
+interface MeetingSchedule {
+  type: string;
+  frequency: string;
+  duration: string;
+  participants: string[];
+  purpose: string;
+}
+
+const meetings: MeetingSchedule[] = [
+  {
+    type: 'Daily Standup',
+    frequency: 'Daily',
+    duration: '15 minutes',
+    participants: ['Kartik', 'Rikhil', 'Vis'],
+    purpose: 'Progress updates and blocker identification'
+  },
+  {
+    type: 'Sprint Review',
+    frequency: 'Bi-weekly',
+    duration: '1 hour',
+    participants: ['Kartik', 'Rikhil', 'Vis', 'Client'],
+    purpose: 'Demo completed features and gather feedback'
+  }
+];
+```
+
+14. APPROVAL
+================================================================
+This project proposal requires approval from:
+• Project Sponsor: Kia Beniston
+• Technical Lead: Vis
+• Development Team: Kartik, Rikhil
+
+Approval Criteria:
+• Budget approval within allocated range
+• Timeline acceptance by all stakeholders
+• Technical approach validation
+• Resource availability confirmation
+
+15. SIGN-OFF
+================================================================
+
+Project Sponsor Approval:
+Name: _________________________
+Signature: ____________________
+Date: _________________________
+
+Technical Lead Approval:
+Name: Vis
+Signature: ____________________
+Date: _________________________
+
+Development Team Approval:
+Name: Kartik
+Signature: ____________________
+Date: _________________________
+
+Name: Rikhil
+Signature: ____________________
+Date: _________________________
+
+Name: Vis
+Signature: ____________________
+Date: _________________________
+
+================================================================
+Project Proposal Version: 1.0
+Last Updated: [Current Date]
+Prepared By: Vis (Project Manager)
+================================================================ 

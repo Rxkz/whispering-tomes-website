@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Book, User, Paintbrush, Home, LogIn, LogOut, Shield } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
-import { Button } from './ui/button';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
 
 const Navigation = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -49,7 +49,7 @@ const Navigation = () => {
       <div className="container mx-auto px-4 flex justify-between items-center">
         <Link 
           to="/" 
-          className="font-cormorant text-3xl font-semibold text-gold tracking-widest uppercase"
+          className="font-cormorant text-2xl font-semibold text-gold tracking-widest"
         >
           KIA BENISTON
         </Link>
@@ -103,7 +103,7 @@ const Navigation = () => {
           </Link>
           
           {user ? (
-            <>
+            <div className="flex items-center space-x-4">
               {isAdmin && (
                 <Link 
                   to="/admin" 
@@ -113,21 +113,26 @@ const Navigation = () => {
                   <span>ADMIN</span>
                 </Link>
               )}
-              <button
+              <Button
                 onClick={handleSignOut}
-                className="nav-item flex items-center gap-1 text-gold hover:text-ivory uppercase tracking-wider"
+                variant="outline"
+                size="sm"
+                className="border-gold text-gold hover:bg-gold hover:text-navy"
               >
-                <LogOut size={16} />
-                <span>SIGN OUT</span>
-              </button>
-            </>
+                <LogOut size={16} className="mr-1" />
+                SIGN OUT
+              </Button>
+            </div>
           ) : (
-            <Link 
-              to="/auth" 
-              className="nav-item flex items-center gap-1 text-gold hover:text-ivory uppercase tracking-wider"
-            >
-              <LogIn size={16} />
-              <span>LOGIN</span>
+            <Link to="/auth">
+              <Button
+                variant="outline"
+                size="sm"
+                className="border-gold text-gold hover:bg-gold hover:text-navy"
+              >
+                <LogIn size={16} className="mr-1" />
+                LOGIN
+              </Button>
             </Link>
           )}
         </div>

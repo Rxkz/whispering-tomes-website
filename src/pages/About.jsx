@@ -3,7 +3,6 @@ import emailjs from 'emailjs-com';
 
 const About = () => {
   const [isImageLoaded, setIsImageLoaded] = useState(false);
-  // Contact form states
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState('');
@@ -14,11 +13,11 @@ const About = () => {
     image.onload = () => setIsImageLoaded(true);
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     setLoading(true);
     setResult('');
@@ -52,16 +51,15 @@ const About = () => {
             <span className="absolute -bottom-3 left-0 right-0 h-0.5 bg-gold/30"></span>
           </span>
         </h1>
-        
-        {/* Author Bio Section - Book Page Design */}
+
+        {/* Author Bio Section */}
         <div className="book-page p-8 md:p-12 max-w-6xl mx-auto mb-20">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
-            {/* Author Image with Ornate Frame */}
             <div className="relative flex justify-center">
               <div className="ornate-frame">
                 <div className={`relative transition-opacity duration-1000 ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}>
                   <img 
-                    src="public\Goat.jpg" 
+                    src="/Goat.jpg"
                     alt="Kia Beniston" 
                     className="rounded-sm"
                   />
@@ -70,13 +68,11 @@ const About = () => {
               </div>
             </div>
             
-            {/* Author Bio */}
             <div className="space-y-6 text-ivory/90">
               <h2 className="font-cormorant text-3xl font-semibold text-gold">Kia Beniston</h2>
               <div className="space-y-4">
                 <p>
-                  Born in the misty valleys of a forgotten countryside, I developed an early fascination with ancient manuscripts and the stories they contained. 
-                  My childhood was spent exploring dusty bookshops and imagining worlds beyond our own.
+                  Born in the misty valleys of a forgotten countryside, I developed an early fascination with ancient manuscripts and the stories they contained. My childhood was spent exploring dusty bookshops and imagining worlds beyond our own.
                 </p>
                 <p>
                   After studying Classical Literature and Archaeology at university, I embarked on a journey across Europe, researching forgotten libraries and uncovering tales that had been lost to time.
@@ -93,7 +89,7 @@ const About = () => {
             </div>
           </div>
         </div>
-        
+
         {/* Writing Process Section */}
         <div className="max-w-4xl mx-auto mb-20">
           <h2 className="text-3xl font-cormorant font-bold text-gold text-center mb-10">
@@ -102,7 +98,7 @@ const About = () => {
               <span className="absolute -bottom-2 left-0 right-0 h-0.5 bg-gold/30"></span>
             </span>
           </h2>
-          
+
           <div className="space-y-12">
             <div className="flex flex-col md:flex-row items-center gap-6">
               <div className="flex-shrink-0 w-24 h-24 flex items-center justify-center rounded-full bg-navy border-2 border-gold/30">
@@ -118,7 +114,7 @@ const About = () => {
                 </p>
               </div>
             </div>
-            
+
             <div className="flex flex-col md:flex-row items-center gap-6">
               <div className="flex-shrink-0 w-24 h-24 flex items-center justify-center rounded-full bg-navy border-2 border-gold/30">
                 <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gold">
@@ -136,7 +132,7 @@ const About = () => {
                 </p>
               </div>
             </div>
-            
+
             <div className="flex flex-col md:flex-row items-center gap-6">
               <div className="flex-shrink-0 w-24 h-24 flex items-center justify-center rounded-full bg-navy border-2 border-gold/30">
                 <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gold">
@@ -153,7 +149,7 @@ const About = () => {
             </div>
           </div>
         </div>
-        
+
         {/* Contact Form */}
         <div className="max-w-2xl mx-auto">
           <h2 className="text-3xl font-cormorant font-bold text-gold text-center mb-10">
@@ -162,7 +158,7 @@ const About = () => {
               <span className="absolute -bottom-2 left-0 right-0 h-0.5 bg-gold/30"></span>
             </span>
           </h2>
-          
+
           <div className="book-page p-8">
             <form className="space-y-6" onSubmit={handleSubmit}>
               <div>
@@ -177,7 +173,7 @@ const About = () => {
                   className="w-full bg-navy/50 border border-gold/30 rounded px-4 py-2 text-ivory focus:outline-none focus:border-gold"
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="email" className="block text-gold font-cormorant mb-2">Email</label>
                 <input 
@@ -190,7 +186,7 @@ const About = () => {
                   className="w-full bg-navy/50 border border-gold/30 rounded px-4 py-2 text-ivory focus:outline-none focus:border-gold"
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="subject" className="block text-gold font-cormorant mb-2">Subject</label>
                 <input 
@@ -203,7 +199,7 @@ const About = () => {
                   className="w-full bg-navy/50 border border-gold/30 rounded px-4 py-2 text-ivory focus:outline-none focus:border-gold"
                 />
               </div>
-              
+
               <div>
                 <label htmlFor="message" className="block text-gold font-cormorant mb-2">Message</label>
                 <textarea 
@@ -216,12 +212,15 @@ const About = () => {
                   className="w-full bg-navy/50 border border-gold/30 rounded px-4 py-2 text-ivory focus:outline-none focus:border-gold"
                 ></textarea>
               </div>
-              
-              <div>
-                <button type="submit" className="gold-btn w-full" disabled={loading}>
-                  {loading ? 'Sending...' : 'Send Message'}
-                </button>
-              </div>
+
+              <button 
+                type="submit" 
+                className="w-full bg-gold text-navy py-3 rounded font-cormorant uppercase tracking-wider hover:bg-gold/90 transition-colors"
+                disabled={loading}
+              >
+                {loading ? 'Sending...' : 'Send Message'}
+              </button>
+
               {result && (
                 <div className="text-center text-gold font-cormorant mt-4">{result}</div>
               )}
@@ -233,4 +232,4 @@ const About = () => {
   );
 };
 
-export default About;
+export default About; 

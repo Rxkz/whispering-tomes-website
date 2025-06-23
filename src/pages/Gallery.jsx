@@ -1,19 +1,10 @@
-
 import { useState } from 'react';
 
-interface ArtworkImage {
-  id: number;
-  title: string;
-  src: string;
-  description: string;
-  category: string;
-}
-
 const Gallery = () => {
-  const [selectedImage, setSelectedImage] = useState<ArtworkImage | null>(null);
-  const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [activeCategory, setActiveCategory] = useState('all');
   
-  const artworks: ArtworkImage[] = [
+  const artworks = [
     {
       id: 1, 
       title: "The Ancient Library",
@@ -71,8 +62,9 @@ const Gallery = () => {
     : artworks.filter(art => art.category === activeCategory);
     
   return (
-    <div className="min-h-screen pt-24 pb-16 px-4">
+    <div className="min-h-screen pt-24 pb-16 px-4 bg-navy">
       <div className="container mx-auto">
+        {/* Heading */}
         <h1 className="text-4xl md:text-5xl font-cormorant font-bold text-gold text-center mb-16">
           <span className="relative inline-block">
             Artwork Gallery
@@ -86,8 +78,8 @@ const Gallery = () => {
             <button
               key={category.id}
               className={`px-4 py-2 font-cormorant uppercase tracking-wider text-sm transition-colors duration-300 ${
-                activeCategory === category.id 
-                  ? 'text-gold border-b border-gold' 
+                activeCategory === category.id
+                  ? 'text-gold border-b border-gold'
                   : 'text-antique/70 hover:text-gold'
               }`}
               onClick={() => setActiveCategory(category.id)}
@@ -100,12 +92,12 @@ const Gallery = () => {
         {/* Gallery Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
           {filteredArtworks.map(artwork => (
-            <div 
+            <div
               key={artwork.id}
               className="book-page p-4 cursor-pointer transform hover:-translate-y-1 transition-transform duration-300"
               onClick={() => setSelectedImage(artwork)}
             >
-              <div className="aspect-square overflow-hidden mb-4 bg-forest/20">
+              <div className="aspect-square overflow-hidden mb-4 bg-forest/20 shadow-sm">
                 <img
                   src={artwork.src}
                   alt={artwork.title}
@@ -120,15 +112,15 @@ const Gallery = () => {
         
         {/* Image Lightbox */}
         {selectedImage && (
-          <div 
+          <div
             className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy/95 backdrop-blur-sm"
             onClick={() => setSelectedImage(null)}
           >
-            <div 
+            <div
               className="relative max-w-4xl w-full max-h-[90vh] overflow-auto"
-              onClick={(e) => e.stopPropagation()}
+              onClick={e => e.stopPropagation()}
             >
-              <button 
+              <button
                 className="absolute top-4 right-4 text-gold hover:text-ivory z-10 bg-navy/50 rounded-full p-2"
                 onClick={() => setSelectedImage(null)}
               >
@@ -137,13 +129,11 @@ const Gallery = () => {
                   <line x1="6" y1="6" x2="18" y2="18"></line>
                 </svg>
               </button>
-              
-              <img 
-                src={selectedImage.src} 
+              <img
+                src={selectedImage.src}
                 alt={selectedImage.title}
                 className="w-full h-auto max-h-[70vh] object-contain"
               />
-              
               <div className="bg-navy/90 border-t border-gold/30 p-6 mt-4">
                 <h3 className="text-2xl font-cormorant font-semibold text-gold mb-2">{selectedImage.title}</h3>
                 <p className="text-ivory/80">{selectedImage.description}</p>
@@ -157,8 +147,8 @@ const Gallery = () => {
           <div className="book-page p-8 text-center">
             <h2 className="text-2xl font-cormorant font-semibold text-gold mb-6">Art Commissions</h2>
             <p className="text-ivory/80 mb-6">
-              I occasionally accept commissions for custom artwork related to literary themes, 
-              ancient manuscripts, and botanical illustrations. If you're interested in commissioning 
+              I occasionally accept commissions for custom artwork related to literary themes,
+              ancient manuscripts, and botanical illustrations. If you're interested in commissioning
               a piece for your personal collection or as a gift, please reach out using the form below.
             </p>
             <button className="gold-btn mx-auto">
