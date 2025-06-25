@@ -1,0 +1,200 @@
+# Project Integration Documentation
+
+---
+
+## 1. Initial Setup: Installing Packages
+
+Before using any integrations, install the required packages in the appropriate directories.
+
+### Backend (`public/backend`)
+```
+cd public/backend
+npm install express cors dotenv stripe @supabase/supabase-js @sendgrid/mail emailjs
+```
+
+### Frontend (root)
+```
+npm install @supabase/supabase-js @stripe/react-stripe-js @stripe/stripe-js emailjs-com
+```
+
+---
+
+## 2. Stripe Integration
+
+### a. Where Stripe is Used
+
+- **Backend File:** public/backend/index.js
+
+### b. How Stripe is Connected
+
+1. **Load Stripe with Secret Key**
+   ```js
+   const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+   ```
+
+2. **Create Checkout Session**
+   ```js
+   app.post('/create-checkout-session', async (req, res) => {
+     // Fetch book info from Supabase
+     // ...
+     const session = await stripe.checkout.sessions.create({
+       payment_method_types: ['card'],
+       line_items: [{ /* book info */ }],
+       mode: 'payment',
+       customer_email: email,
+       success_url: 'http://localhost:8080/success?session_id={CHECKOUT_SESSION_ID}',
+       cancel_url: 'http://localhost:8080/cancel',
+       metadata: { book_id: bookId, user_id: userId },
+       invoice_creation: { enabled: true },
+     });
+     res.json({ url: session.url });
+   });
+   ```
+
+3. **Handle Stripe Webhook**
+   ```js
+   app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, res) => {
+     const sig = req.headers['stripe-signature'];
+     let event;
+     try {
+       event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+     } catch (err) {
+       return res.status(400).send(`Webhook Error: ${err.message}`);
+     }
+     if (event.type === 'checkout.session.completed') {
+       // Handle order, send email, etc.
+     }
+   });
+   ```
+
+### c. Notes/Issues
+
+- bodyParser.raw is required for the webhook route.
+- Stripe keys are loaded from .env in public/backend.
+- The frontend calls /create-checkout-session to start a payment.
+
+---
+
+## 3. Supabase Integration
+
+### a. Where Supabase is Connected
+
+- **Backend:** public/backend/index.js
+- **Frontend:** src/integrations/supabase/client.ts
+
+### b. How Supabase is Connected
+
+**Backend:**
+```js
+const { createClient } = require('@supabase/supabase-js');
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+```
+
+**Frontend:**
+```ts
+import { createClient } from '@supabase/supabase-js';
+export const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL!,
+  import.meta.env.VITE_SUPABASE_ANON_KEY!
+);
+```
+
+### c. How It Works
+
+- **Backend:** Reads/writes to tables like books, orders, and handles storage (e.g., signed URLs for ebook downloads).
+- **Frontend:** Uses the Supabase client to fetch books, user data, etc., directly from the browser.
+
+### d. Communication
+
+- **Frontend ↔ Supabase:** Direct via Supabase JS client (for public/anon operations).
+- **Backend ↔ Supabase:** Uses service role key for secure operations (e.g., order creation, storage).
+
+---
+
+## 4. Admin: Add Books & Database Functions
+
+### a. Where
+
+- **File:** src/pages/AdminDashboard.tsx
+
+### b. How "Add Book" Works
+
+1. Admin fills out a form (title, description, price, cover, ebook file, etc.).
+2. Uploads files to Supabase storage:
+   ```ts
+   const { data, error } = await supabase.storage.from('ebook').upload(filePath, file);
+   ```
+3. Inserts a new row in the books table:
+   ```ts
+   const { data, error } = await supabase
+     .from('books')
+     .insert([{ title, description, price, cover_image_url, ebook }]);
+   ```
+4. Other admin functions (edit, delete, list) use similar Supabase client methods.
+
+---
+
+## 5. Email Integration
+
+### a. SendGrid
+
+- **Backend File:** public/backend/index.js
+- **Setup:**
+  ```js
+  const sgMail = require('@sendgrid/mail');
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  ```
+- **Sending Email:**
+  ```js
+  await sgMail.send({
+    to: email,
+    from: process.env.SENDGRID_FROM_EMAIL || 'rikhilprakash383@gmail.com',
+    subject: `Your Book Purchase: ${bookData.title}`,
+    html: htmlContent,
+  });
+  ```
+- **Test Endpoint:** /test-sendgrid for testing email sending.
+
+### b. EmailJS
+
+- **Packages installed:**  
+  - Backend: emailjs (in public/backend/package.json)
+  - Frontend: emailjs-com (in package.json)
+- **Usage:**  
+  - No actual usage found in your codebase.  
+  - If you want to use EmailJS, you would typically do something like:
+    ```js
+    // Frontend example (not present in your code)
+    import emailjs from 'emailjs-com';
+    emailjs.send('service_id', 'template_id', templateParams, 'user_id');
+    ```
+  - No environment variables or code references found for EmailJS.
+
+---
+
+## 6. Environment Variables
+
+- **Backend (public/backend/.env):**
+  - STRIPE_SECRET_KEY
+  - STRIPE_WEBHOOK_SECRET
+  - SENDGRID_API_KEY
+  - SENDGRID_FROM_EMAIL
+  - SUPABASE_URL
+  - SUPABASE_SERVICE_ROLE_KEY
+- **Frontend (.env or Vite env):**
+  - VITE_SUPABASE_URL
+  - VITE_SUPABASE_ANON_KEY
+
+---
+
+## 7. Code Reference Table
+
+| Feature         | File(s) / Location                        | Key Code/Function(s)                                 |
+|-----------------|-------------------------------------------|------------------------------------------------------|
+| Stripe Setup    | public/backend/index.js                 | require('stripe'), /create-checkout-session, /webhook |
+| Supabase Setup  | public/backend/index.js, src/integrations/supabase/client.ts | createClient, DB/storage calls                     |
+| Admin Add Book  | src/pages/AdminDashboard.tsx            | supabase.storage.from('ebook').upload, .from('books').insert |
+| SendGrid Email  | public/backend/index.js                 | sgMail.send, /test-sendgrid                      |
+| EmailJS         | (Not used in code, only installed)        | (See above for example usage)                        |
+
+</rewritten_file> 
