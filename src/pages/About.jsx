@@ -9,7 +9,7 @@ const About = () => {
 
   useEffect(() => {
     const image = new Image();
-    image.src = '/Goat.jpg';
+    image.src = '/AuthorPic.JPEG';
     image.onload = () => setIsImageLoaded(true);
   }, []);
 
@@ -59,7 +59,7 @@ const About = () => {
               <div className="ornate-frame">
                 <div className={`relative transition-opacity duration-1000 ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}>
                   <img 
-                    src="/Goat.jpg"
+                    src="/AuthorPic.JPEG"
                     alt="Kia Beniston" 
                     className="rounded-sm"
                   />
@@ -72,13 +72,10 @@ const About = () => {
               <h2 className="font-cormorant text-3xl font-semibold text-gold">Kia Beniston</h2>
               <div className="space-y-4">
                 <p>
-                  Born in the misty valleys of a forgotten countryside, I developed an early fascination with ancient manuscripts and the stories they contained. My childhood was spent exploring dusty bookshops and imagining worlds beyond our own.
+                  K Beniston is a writer based in New Zealand, who spends her days dreaming up dystopian worlds and creating larger-than-life characters. With a passion for all things sci-fi, her work is heavily influenced by the likes of Phillip Reeves, and she's been known to dabble in a bit of adult fiction, too. 
                 </p>
                 <p>
-                  After studying Classical Literature and Archaeology at university, I embarked on a journey across Europe, researching forgotten libraries and uncovering tales that had been lost to time.
-                </p>
-                <p>
-                  Now, I craft stories that blend historical mysteries with elements of the supernatural, inviting readers to venture into realms where knowledge is the most powerful magic and ancient secrets await discovery.
+                  When she's not busy typing away at her latest novel, you can find her enjoying some of her favourite hobbies, including hanging out with her pets and exploring the picturesque landscapes of New Zealand. With a keen eye for detail and a knack for keeping readers on the edge of their seats, K Beniston's books are a must-read for anyone looking to escape into a thrilling, futuristic adventure. So, grab a copy of her latest novel, and get ready to be transported to a whole new world.
                 </p>
               </div>
               <div className="pt-2">

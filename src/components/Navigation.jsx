@@ -3,6 +3,14 @@ import { Link, useLocation } from 'react-router-dom';
 import { Book, User, Paintbrush, Home, LogIn, LogOut, Shield } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { Menu, ChevronDown } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem
+} from '@/components/ui/dropdown-menu';
 
 const Navigation = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -103,7 +111,7 @@ const Navigation = () => {
           </Link>
           
           {user ? (
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 relative group">
               {isAdmin && (
                 <Link 
                   to="/admin" 
@@ -113,15 +121,34 @@ const Navigation = () => {
                   <span>ADMIN</span>
                 </Link>
               )}
-              <Button
-                onClick={handleSignOut}
-                variant="outline"
-                size="sm"
-                className="border-gold text-gold hover:bg-gold hover:text-navy"
-              >
-                <LogOut size={16} className="mr-1" />
-                SIGN OUT
-              </Button>
+              {/* Profile Avatar Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="focus:outline-none flex items-center" aria-label="Open profile menu">
+                    <Avatar>
+                      <AvatarImage src={user.user_metadata?.avatar_url || undefined} alt={user.email} />
+                      <AvatarFallback>
+                        {user.email ? user.email[0].toUpperCase() : '?'}
+                      </AvatarFallback>
+                    </Avatar>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" sideOffset={8} className="w-48 bg-navy border border-gold/20 rounded shadow-lg z-50">
+                  <DropdownMenuItem asChild>
+                    <Link to="#" className="block w-full text-left px-4 py-2 text-ivory hover:bg-gold/10">
+                      Profile Settings
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <button
+                      onClick={handleSignOut}
+                      className="block w-full text-left px-4 py-2 text-ivory hover:bg-gold/10"
+                    >
+                      Sign Out
+                    </button>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           ) : (
             <Link to="/auth">

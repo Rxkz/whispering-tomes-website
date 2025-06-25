@@ -23,18 +23,68 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [bookCount, setBookCount] = useState(0);
+  const [userCount, setUserCount] = useState(0);
+  const [orderCount, setOrderCount] = useState(0);
   const [showSuccess, setShowSuccess] = useState(false);
   const [pdfFile, setPdfFile] = useState(null);
   const [pdfName, setPdfName] = useState('');
+  const [orders, setOrders] = useState([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
+  const [ordersError, setOrdersError] = useState(null);
+  const [showOrders, setShowOrders] = useState(false);
+  const [recentActivity, setRecentActivity] = useState([]);
+  const [activityLoading, setActivityLoading] = useState(false);
+
+  // Move count fetchers outside useEffect for reuse
+  const fetchBookCount = async () => {
+    const { count, error } = await supabase.from('books').select('*', { count: 'exact', head: true });
+    if (!error && typeof count === 'number') {
+      setBookCount(count);
+    }
+  };
+  const fetchUserCount = async () => {
+    // Use profiles table for user count
+    const { count, error } = await supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true });
+    if (!error && typeof count === 'number') {
+      setUserCount(count);
+    }
+  };
+  const fetchOrderCount = async () => {
+    const { count, error } = await supabase.from('orders').select('*', { count: 'exact', head: true });
+    if (!error && typeof count === 'number') {
+      setOrderCount(count);
+    }
+  };
+
+  const fetchRecentActivity = async () => {
+    setActivityLoading(true);
+    // Use the custom database function to get joined activity data
+    const { data, error } = await supabase.rpc('get_recent_activity');
+
+    if (!error && data) {
+      // Map the flat data from the RPC to the nested structure the component expects
+      const formattedData = data.map(activity => ({
+        id: activity.order_id,
+        created_at: activity.created_at,
+        status: activity.status,
+        profiles: { username: activity.username },
+        books: { title: activity.book_title }
+      }));
+      setRecentActivity(formattedData);
+    } else if (error) {
+      console.error('Error fetching recent activity via RPC:', error.message);
+      setRecentActivity([]); // Clear activity on error
+    }
+    setActivityLoading(false);
+  };
 
   useEffect(() => {
-    const fetchBookCount = async () => {
-      const { count, error } = await supabase.from('books').select('*', { count: 'exact', head: true });
-      if (!error && typeof count === 'number') {
-        setBookCount(count);
-      }
-    };
     fetchBookCount();
+    fetchUserCount();
+    fetchOrderCount();
+    fetchRecentActivity();
   }, []);
 
   const handleChange = (e) => {
@@ -130,6 +180,31 @@ const AdminDashboard = () => {
       setShowModal(false);
       setShowSuccess(true);
       setTimeout(() => setShowSuccess(false), 2500);
+      fetchBookCount(); // update book count after adding
+      fetchOrderCount(); // in case adding a book triggers an order
+      fetchRecentActivity(); // update activity
+    }
+  };
+
+  // Fetch orders from Supabase
+  const handleViewOrders = async () => {
+    setShowOrders(true);
+    setOrdersLoading(true);
+    setOrdersError(null);
+    try {
+      // Revert: fetch only from orders, no join
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .order('id', { ascending: false });
+      if (error) throw error;
+      setOrders(data || []);
+      fetchOrderCount(); // update order count after viewing orders
+      fetchRecentActivity(); // update activity
+    } catch (err) {
+      setOrdersError('Failed to fetch orders');
+    } finally {
+      setOrdersLoading(false);
     }
   };
 
@@ -162,7 +237,7 @@ const AdminDashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold text-ivory">0</p>
+              <p className="text-2xl font-bold text-ivory">{userCount}</p>
               <p className="text-sm text-ivory/70">Total registered users</p>
             </CardContent>
           </Card>
@@ -188,7 +263,7 @@ const AdminDashboard = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold text-ivory">0</p>
+              <p className="text-2xl font-bold text-ivory">{orderCount}</p>
               <p className="text-sm text-ivory/70">Total orders</p>
             </CardContent>
           </Card>
@@ -222,7 +297,7 @@ const AdminDashboard = () => {
               <Button className="w-full bg-gold hover:bg-gold/90 text-navy">
                 Manage Users
               </Button>
-              <Button className="w-full bg-gold hover:bg-gold/90 text-navy">
+              <Button className="w-full bg-gold hover:bg-gold/90 text-navy" onClick={handleViewOrders}>
                 View Orders
               </Button>
               <Button className="w-full bg-gold hover:bg-gold/90 text-navy">
@@ -239,9 +314,46 @@ const AdminDashboard = () => {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="text-ivory/70 text-center py-8">
-                No recent activity to display
-              </div>
+              {activityLoading ? (
+                <div className="text-sm text-center text-gray-500 py-8">Loading...</div>
+              ) : recentActivity.length > 0 ? (
+                <ul className="space-y-4">
+                  {recentActivity.map((activity) => (
+                    <li key={activity.id} className="grid grid-cols-3 items-center gap-4 text-sm">
+                      <div className="text-left">
+                        <p className="font-medium text-white">
+                          New Order from {activity.profiles?.username || 'Unknown User'}
+                        </p>
+                        <p className="text-gray-400">
+                          Book: {activity.books?.title || 'Unknown Book'}
+                        </p>
+                      </div>
+                      
+                      <div className="text-center">
+                        {activity.status && (
+                          ['delivered', 'paid'].includes(activity.status.toLowerCase()) ? (
+                            <span className="px-3 py-1 text-xs font-bold text-green-900 bg-green-300 rounded-full">
+                              {activity.status.charAt(0).toUpperCase() + activity.status.slice(1)}
+                            </span>
+                          ) : (
+                            <span className="px-3 py-1 text-xs font-bold text-red-900 bg-red-300 rounded-full">
+                              {activity.status.charAt(0).toUpperCase() + activity.status.slice(1)}
+                            </span>
+                          )
+                        )}
+                      </div>
+
+                      <time className="text-right text-xs text-gray-500">
+                        {new Date(activity.created_at).toLocaleString()}
+                      </time>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-center text-gray-500 py-8">
+                  No recent activity to display
+                </p>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -284,6 +396,50 @@ const AdminDashboard = () => {
           <div className="fixed inset-0 z-50 flex items-center justify-center">
             <div className="bg-navy border border-gold px-8 py-5 rounded shadow-lg text-gold font-cormorant text-lg animate-fade-in">
               Book added!
+            </div>
+          </div>
+        )}
+
+        {/* Orders Modal */}
+        {showOrders && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+            <div className="bg-navy p-8 rounded-lg shadow-lg w-full max-w-4xl relative overflow-y-auto max-h-[90vh]">
+              <button className="absolute top-2 right-2 text-gold" onClick={() => setShowOrders(false)}>&times;</button>
+              <h2 className="text-2xl text-gold mb-4 font-cormorant">Orders</h2>
+              {ordersLoading ? (
+                <div className="text-gold">Loading orders...</div>
+              ) : ordersError ? (
+                <div className="text-red-500">{ordersError}</div>
+              ) : orders.length === 0 ? (
+                <div className="text-ivory/70">No orders found.</div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full border border-gold/20 rounded text-ivory">
+                    <thead>
+                      <tr className="bg-navy/80 text-gold">
+                        <th className="px-4 py-2 border-b border-gold/20 border-r border-gold/20">Order ID</th>
+                        <th className="px-4 py-2 border-b border-gold/20 border-r border-gold/20">User ID</th>
+                        <th className="px-4 py-2 border-b border-gold/20 border-r border-gold/20">Book ID</th>
+                        <th className="px-4 py-2 border-b border-gold/20 border-r border-gold/20">Status</th>
+                        <th className="px-4 py-2 border-b border-gold/20 border-r border-gold/20">Total Amount</th>
+                        <th className="px-4 py-2 border-b border-gold/20">Stripe Session ID</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {orders.map(order => (
+                        <tr key={order.id} className="border-b border-gold/10 hover:bg-navy/60">
+                          <td className="px-4 py-2 border-r border-gold/20">{order.id}</td>
+                          <td className="px-4 py-2 border-r border-gold/20">{order.user_id}</td>
+                          <td className="px-4 py-2 border-r border-gold/20">{order.book_id}</td>
+                          <td className="px-4 py-2 border-r border-gold/20">{order.status}</td>
+                          <td className="px-4 py-2 border-r border-gold/20">${order.total_amount}</td>
+                          <td className="px-4 py-2 text-xs break-all">{order.stripe_session_id}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
             </div>
           </div>
         )}
