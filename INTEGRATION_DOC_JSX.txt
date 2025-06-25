@@ -1,0 +1,565 @@
+# Project Integration Documentation - JSX Branch
+
+---
+
+## 1. Initial Setup: Installing Packages
+
+Before using any integrations, install the required packages in the appropriate directories.
+
+### Backend (`public/backend`)
+```bash
+cd public/backend
+npm install express cors dotenv stripe @supabase/supabase-js @sendgrid/mail emailjs
+```
+
+### Frontend (root)
+```bash
+npm install @supabase/supabase-js @stripe/react-stripe-js @stripe/stripe-js emailjs-com react-router-dom @tanstack/react-query
+```
+
+---
+
+## 2. Stripe Integration
+
+### a. Where Stripe is Used
+
+- **Backend File:** `public/backend/index.js`
+- **Frontend Integration:** `src/pages/Books.jsx`
+
+### b. How Stripe is Connected
+
+**Backend Setup:**
+```js
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+```
+
+**Frontend Integration (JSX):**
+```jsx
+// In src/pages/Books.jsx
+const handlePurchase = async () => {
+  if (!user) {
+    alert("Please sign in to purchase.");
+    return;
+  }
+  try {
+    const res = await fetch("http://localhost:4242/create-checkout-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        bookId: selectedBook.id,
+        userId: user.id,
+        email: user.email,
+      }),
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert("Failed to start checkout.");
+    }
+  } catch (err) {
+    alert("Error starting checkout.");
+  }
+};
+```
+
+**Backend Checkout Session Creation:**
+```js
+app.post('/create-checkout-session', async (req, res) => {
+  const { bookId, userId, email } = req.body;
+  
+  // Fetch book info from Supabase
+  const { data: book, error } = await supabase
+    .from('books')
+    .select('*')
+    .eq('id', bookId)
+    .single();
+
+  if (error || !book) {
+    return res.status(400).json({ error: 'Book not found' });
+  }
+
+  const session = await stripe.checkout.sessions.create({
+    payment_method_types: ['card'],
+    line_items: [{
+      price_data: {
+        currency: 'usd',
+        product_data: {
+          name: book.title,
+          description: book.description,
+          images: [book.cover_image_url],
+        },
+        unit_amount: Math.round(Number(book.price) * 100),
+      },
+      quantity: 1,
+    }],
+    mode: 'payment',
+    customer_email: email,
+    success_url: 'http://localhost:8080/success?session_id={CHECKOUT_SESSION_ID}',
+    cancel_url: 'http://localhost:8080/cancel',
+    metadata: { book_id: bookId, user_id: userId },
+    invoice_creation: { enabled: true },
+  });
+
+  res.json({ url: session.url });
+});
+```
+
+**Webhook Handling:**
+```js
+app.post('/webhook', bodyParser.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  let event;
+  try {
+    event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  } catch (err) {
+    return res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+  
+  if (event.type === 'checkout.session.completed') {
+    // Handle order creation, email sending, etc.
+  }
+});
+```
+
+### c. Notes/Issues
+
+- **bodyParser.raw** is required for the webhook route
+- Stripe keys are loaded from `.env` in `public/backend`
+- Frontend calls `/create-checkout-session` to initiate payment
+- User authentication check before purchase in JSX
+
+---
+
+## 3. Supabase Integration
+
+### a. Where Supabase is Connected
+
+- **Backend:** `public/backend/index.js`
+- **Frontend:** `src/integrations/supabase/client.js`
+
+### b. How Supabase is Connected
+
+**Frontend Client (JSX):**
+```js
+// src/integrations/supabase/client.js
+import { createClient } from '@supabase/supabase-js';
+
+const SUPABASE_URL = "https://sbywbwrhcrmtbbmsupbm.supabase.co";
+const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...";
+
+export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+```
+
+**Backend Client:**
+```js
+const { createClient } = require('@supabase/supabase-js');
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+```
+
+### c. Authentication Context (JSX)
+
+**File:** `src/contexts/AuthContext.jsx`
+
+```jsx
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { supabase } from '../integrations/supabase/client';
+
+const AuthContext = createContext(undefined);
+
+export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
+  const [session, setSession] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          // Check if user is admin
+          const { data } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', session.user.id)
+            .eq('role', 'admin')
+            .single();
+          setIsAdmin(!!data);
+        } else {
+          setIsAdmin(false);
+        }
+        
+        setIsLoading(false);
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const signUp = async (email, password, fullName, username) => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { full_name: fullName, username: username },
+      },
+    });
+    if (error) throw error;
+  };
+
+  const signIn = async (email, password) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) throw error;
+  };
+
+  const signOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, session, isLoading, isAdmin, signUp, signIn, signOut }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+```
+
+### d. How It Works
+
+- **Backend:** Reads/writes to tables like `books`, `orders`, handles storage
+- **Frontend:** Uses Supabase client for authentication, book fetching, admin operations
+- **Authentication:** Managed through React Context with real-time auth state changes
+
+---
+
+## 4. Admin: Add Books & Database Functions
+
+### a. Where
+
+- **File:** `src/pages/AdminDashboard.jsx`
+
+### b. How "Add Book" Works (JSX)
+
+```jsx
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setMessage(null);
+  
+  let cover_image_url = '';
+  let ebook = '';
+  
+  // Upload cover image
+  if (coverFile) {
+    const fileExt = coverFile.name.split('.').pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+    const { data, error: uploadError } = await supabase.storage
+      .from('img')
+      .upload(fileName, coverFile, { cacheControl: '3600', upsert: false });
+    
+    if (uploadError) {
+      setLoading(false);
+      setMessage('Error uploading image: ' + uploadError.message);
+      return;
+    }
+    cover_image_url = `${supabase.storage.from('img').getPublicUrl(fileName).data.publicUrl}`;
+  }
+  
+  // Upload PDF
+  if (pdfFile) {
+    const fileExt = pdfFile.name.split('.').pop();
+    const fileName = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}.${fileExt}`;
+    const { data, error: pdfError } = await supabase.storage
+      .from('ebook')
+      .upload(fileName, pdfFile, { cacheControl: '3600', upsert: false });
+    
+    if (pdfError) {
+      setLoading(false);
+      setMessage('Error uploading PDF: ' + pdfError.message);
+      return;
+    }
+    ebook = fileName;
+  }
+  
+  // Insert book into database
+  const { title, author, description, price, release_date, pages, format } = form;
+  const { error } = await supabase.from('books').insert([{
+    title,
+    author,
+    description,
+    price: parseFloat(price),
+    cover_image_url,
+    ebook,
+    release_date,
+    pages: pages ? parseInt(pages) : null,
+    format,
+  }]);
+  
+  setLoading(false);
+  if (error) {
+    setMessage('Error adding book: ' + error.message);
+  } else {
+    setMessage('Book added successfully!');
+    // Reset form and update counts
+  }
+};
+```
+
+### c. Book Management Functions
+
+**Fetch Books:**
+```jsx
+// In src/pages/Books.jsx
+useEffect(() => {
+  const fetchBooks = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('books')
+      .select('*')
+      .order('created_at', { ascending: false });
+    if (error) {
+      setError('Failed to fetch books');
+    } else {
+      setBooks(data || []);
+    }
+    setLoading(false);
+  };
+  fetchBooks();
+}, []);
+```
+
+**Edit Book:**
+```jsx
+const handleEditSubmit = async (e) => {
+  e.preventDefault();
+  setEditLoading(true);
+  const { id, title, author, description, price, cover_image_url } = editForm;
+  const { error } = await supabase
+    .from('books')
+    .update({
+      title,
+      author,
+      description,
+      price: parseFloat(price),
+      cover_image_url,
+    })
+    .eq('id', id);
+  
+  setEditLoading(false);
+  if (error) {
+    setEditMessage('Error updating book: ' + error.message);
+  } else {
+    setEditMessage('Book updated successfully!');
+    // Update local state
+  }
+};
+```
+
+**Delete Book:**
+```jsx
+const confirmDelete = async () => {
+  const id = deleteId;
+  const bookToDelete = books.find((b) => String(b.id) === String(id));
+  setShowDeleteModal(false);
+  
+  await supabase.from('books').delete().eq('id', id);
+  setBooks(books.filter((b) => String(b.id) !== String(id)));
+  
+  // Delete image from storage
+  if (bookToDelete && bookToDelete.cover_image_url) {
+    try {
+      const urlParts = bookToDelete.cover_image_url.split('/');
+      const fileName = urlParts[urlParts.length - 1];
+      await supabase.storage.from('img').remove([fileName]);
+    } catch (e) {
+      // Handle error
+    }
+  }
+  
+  setActionMessage('Book deleted!');
+  setShowAction(true);
+  setTimeout(() => setShowAction(false), 2500);
+  setDeleteId(null);
+};
+```
+
+---
+
+## 5. Email Integration
+
+### a. SendGrid
+
+- **Backend File:** `public/backend/index.js`
+- **Setup:**
+  ```js
+  const sgMail = require('@sendgrid/mail');
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  ```
+- **Sending Email (after purchase):**
+  ```js
+  await sgMail.send({
+    to: email,
+    from: process.env.SENDGRID_FROM_EMAIL || 'rikhilprakash383@gmail.com',
+    subject: `Your Book Purchase: ${bookData.title}`,
+    html: htmlContent,
+  });
+  ```
+- **Test Endpoint:** `/test-sendgrid` for testing email sending
+
+### b. EmailJS
+
+- **Packages installed:**  
+  - Backend: `emailjs` (in `public/backend/package.json`)
+  - Frontend: `emailjs-com` (in `package.json`)
+- **Usage:**  
+  - No actual usage found in your JSX codebase
+  - If you want to use EmailJS in JSX, you would typically do:
+    ```jsx
+    import emailjs from 'emailjs-com';
+    
+    const sendEmail = () => {
+      emailjs.send('service_id', 'template_id', templateParams, 'user_id')
+        .then((response) => {
+          console.log('SUCCESS!', response.status, response.text);
+        }, (err) => {
+          console.log('FAILED...', err);
+        });
+    };
+    ```
+
+---
+
+## 6. React Router & App Structure (JSX)
+
+### a. App Setup
+
+**File:** `src/App.jsx`
+```jsx
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
+
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <AuthProvider>
+      <BrowserRouter>
+        <Navigation />
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/books" element={<Books />} />
+          <Route path="/gallery" element={<Gallery />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/success" element={<Success />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <Footer />
+      </BrowserRouter>
+    </AuthProvider>
+  </QueryClientProvider>
+);
+```
+
+### b. Authentication Page
+
+**File:** `src/pages/Auth.jsx`
+```jsx
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+
+  try {
+    if (isSignUp) {
+      await signUp(email, password, fullName, username);
+      toast({
+        title: "Success!",
+        description: "Account created successfully. You can now sign in.",
+      });
+      setIsSignUp(false);
+    } else {
+      await signIn(email, password);
+      toast({
+        title: "Welcome back!",
+        description: "You have been signed in successfully.",
+      });
+      navigate('/');
+    }
+  } catch (error) {
+    toast({
+      title: "Error",
+      description: error.message || "An error occurred. Please try again.",
+      variant: "destructive",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+```
+
+---
+
+## 7. Environment Variables
+
+- **Backend (`public/backend/.env`):**
+  - `STRIPE_SECRET_KEY`
+  - `STRIPE_WEBHOOK_SECRET`
+  - `SENDGRID_API_KEY`
+  - `SENDGRID_FROM_EMAIL`
+  - `SUPABASE_URL`
+  - `SUPABASE_SERVICE_ROLE_KEY`
+- **Frontend:**
+  - Supabase URL and keys are hardcoded in `src/integrations/supabase/client.js`
+  - Consider moving to environment variables for production
+
+---
+
+## 8. Code Reference Table (JSX)
+
+| Feature         | File(s) / Location                        | Key Code/Function(s)                                 |
+|-----------------|-------------------------------------------|------------------------------------------------------|
+| Stripe Setup    | `public/backend/index.js`                 | `require('stripe')`, `/create-checkout-session`, `/webhook` |
+| Stripe Frontend | `src/pages/Books.jsx`                     | `handlePurchase()`, fetch to backend                 |
+| Supabase Setup  | `src/integrations/supabase/client.js`     | `createClient`, hardcoded keys                       |
+| Auth Context    | `src/contexts/AuthContext.jsx`            | `AuthProvider`, `useAuth()`, auth state management   |
+| Admin Add Book  | `src/pages/AdminDashboard.jsx`            | `handleSubmit()`, storage upload, DB insert          |
+| Book Management | `src/pages/Books.jsx`                     | `fetchBooks()`, `handleEditSubmit()`, `confirmDelete()` |
+| SendGrid Email  | `public/backend/index.js`                 | `sgMail.send()`, `/test-sendgrid`                    |
+| EmailJS         | (Not used in code, only installed)        | (See above for example usage)                        |
+| React Router    | `src/App.jsx`                             | `BrowserRouter`, `Routes`, `Route`                   |
+| Auth Page       | `src/pages/Auth.jsx`                      | `handleSubmit()`, sign in/up logic                   |
+
+---
+
+## 9. Key Differences from TypeScript Version
+
+1. **File Extensions:** `.jsx` instead of `.tsx`
+2. **Type Annotations:** No TypeScript types
+3. **Supabase Client:** Hardcoded keys instead of environment variables
+4. **Error Handling:** More basic error handling without TypeScript strictness
+5. **Component Props:** No interface definitions for props
+
+---
+
+## 10. Payment Flow (JSX)
+
+1. **User clicks "Buy"** → `handlePurchase()` in `Books.jsx`
+2. **Frontend calls backend** → `fetch("http://localhost:4242/create-checkout-session")`
+3. **Backend creates Stripe session** → Returns session URL
+4. **Frontend redirects** → `window.location.href = data.url`
+5. **Stripe handles payment** → User completes payment
+6. **Webhook processes** → Backend creates order, sends email
+7. **User receives email** → Download link via SendGrid
+
+---
+
+This documentation covers all the integrations in your JSX branch with specific code references and explanations for how each service is connected and used. 
